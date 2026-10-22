@@ -101,7 +101,7 @@ export function RealSizeView({ item, paper, framed, onClose }: RealSizeProps) {
                 ['--ppi' as string]: `${calibration.pxPerInch}px`,
               }}
             >
-              <PhotoCrop photo={item.photo} shape={item.shape} crop={itemCrop(item)} print={print} />
+              <PhotoCrop photo={item.photo} fit={item.fit} crop={itemCrop(item)} print={print} />
               {framed && <div className="crop-shade" />}
             </div>
           </div>

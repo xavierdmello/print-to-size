@@ -289,8 +289,32 @@ select {
   cursor: pointer;
 }
 
-.link-button:hover {
+.link-button:hover:not(:disabled) {
   text-decoration: underline;
+}
+
+.link-button:disabled {
+  color: var(--text-soft);
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--focus);
+}
+
+.checkbox:has(input:disabled) {
+  color: var(--text-soft);
+  cursor: default;
 }
 
 .stepper {
@@ -315,17 +339,25 @@ select {
 /* Page preview */
 
 .preview {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   background: var(--preview);
 }
 
 .page-area {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  flex: 1;
+  min-height: 0;
   display: grid;
   place-items: center;
+}
+
+.preview-controls {
+  display: flex;
+  justify-content: center;
+  padding: 4px 16px 14px;
 }
 
 .page {

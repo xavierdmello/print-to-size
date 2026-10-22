@@ -3,7 +3,6 @@ import type { Shape } from '../lib/crop'
 const SHAPES: { shape: Shape; label: string }[] = [
   { shape: 'wide', label: 'Wide' },
   { shape: 'tall', label: 'Tall' },
-  { shape: 'whole', label: 'Whole photo' },
 ]
 
 interface ShapePickerProps {

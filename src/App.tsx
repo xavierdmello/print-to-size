@@ -98,7 +98,7 @@ export default function App() {
   }, [addFiles])
 
   function setCrop(target: PrintItem, crop: Crop) {
-    if (target.shape !== 'whole') dispatch({ type: 'setCrop', id: target.id, shape: target.shape, crop })
+    dispatch({ type: 'setCrop', id: target.id, shape: target.shape, crop })
   }
 
   function setSize(sizeId: SizeId) {
@@ -208,6 +208,14 @@ export default function App() {
               }
             />
           )}
+          <div className="preview-controls">
+            <AdjustPad
+              item={item}
+              paper={paper}
+              rotated={itemRotated && !flags.frameCrop}
+              onCrop={(crop) => item && setCrop(item, crop)}
+            />
+          </div>
         </section>
         <SizeList shape={item?.shape ?? 'wide'} paper={paper} sizeId={item?.sizeId ?? state.sizeId} onChange={setSize} />
       </div>
@@ -237,14 +245,21 @@ export default function App() {
             </button>
           </div>
         </div>
-        <AdjustPad item={item} paper={paper} rotated={itemRotated && !flags.frameCrop} onCrop={(crop) => item && setCrop(item, crop)} />
+        <label className="checkbox">
+          <input
+            id="fit"
+            type="checkbox"
+            checked={item?.fit ?? true}
+            disabled={!item}
+            onChange={(event) => item && dispatch({ type: 'setFit', id: item.id, fit: event.currentTarget.checked })}
+          />
+          Fit picture to frame
+        </label>
         <div className="options-end">
           {flags.realSize && item && <RealSizeButton item={item} paper={paper} framed={frameCropProps(flags).className} />}
-          {item && (
-            <button type="button" className="link-button" onClick={() => removeItem(item)}>
-              Remove photo
-            </button>
-          )}
+          <button type="button" className="link-button" disabled={!item} onClick={() => item && removeItem(item)}>
+            Remove photo
+          </button>
         </div>
       </div>
 

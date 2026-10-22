@@ -49,6 +49,13 @@ describe('reducer', () => {
     expect(state.selectedId).toBeNull()
   })
 
+  it('fits new photos to the frame and can switch to the whole photo', () => {
+    let state = withPhotos(photo('a'))
+    expect(state.items[0].fit).toBe(true)
+    state = reducer(state, { type: 'setFit', id: 'a', fit: false })
+    expect(state.items[0].fit).toBe(false)
+  })
+
   it('keeps copies between one and the maximum', () => {
     let state = withPhotos(photo('a'))
     state = reducer(state, { type: 'setCopies', id: 'a', copies: 0 })

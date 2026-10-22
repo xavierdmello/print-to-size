@@ -1,7 +1,7 @@
 import type { PrintSize } from './sizes'
 
-export type Shape = 'wide' | 'tall' | 'whole'
-export type CropShape = Exclude<Shape, 'whole'>
+/** Which way the frame stands. */
+export type Shape = 'wide' | 'tall'
 
 export interface Dimensions {
   width: number
@@ -26,14 +26,13 @@ export interface Crop {
 export const MAX_ZOOM = 4
 export const CENTERED: Crop = { zoom: 1, cx: 0.5, cy: 0.5 }
 
-export function naturalShape(image: Dimensions): CropShape {
+export function naturalShape(image: Dimensions): Shape {
   return image.width >= image.height ? 'wide' : 'tall'
 }
 
-/** Printed size in inches. A whole photo uses the frame orientation that matches it. */
-export function printDimensions(size: PrintSize, shape: Shape, image: Dimensions): Dimensions {
-  const orientation = shape === 'whole' ? naturalShape(image) : shape
-  return orientation === 'wide'
+/** Printed size in inches. */
+export function printDimensions(size: PrintSize, shape: Shape): Dimensions {
+  return shape === 'wide'
     ? { width: size.long, height: size.short }
     : { width: size.short, height: size.long }
 }

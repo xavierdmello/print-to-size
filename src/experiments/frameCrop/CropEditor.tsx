@@ -38,7 +38,7 @@ export function CropEditor({ item, paper, onCrop, className, room = 0.07 }: Crop
   const crop = itemCrop(item)
   const rect = cropRect(photo, aspect, crop)
   const frame = stage ? fitWindow(stage, aspect, room) : null
-  const editable = item.shape !== 'whole'
+  const editable = item.fit
 
   function pan(dxScreen: number, dyScreen: number) {
     if (!frame) return
@@ -136,7 +136,7 @@ export function CropEditor({ item, paper, onCrop, className, room = 0.07 }: Crop
               <div className="crop-shade" />
             </>
           ) : (
-            <PhotoCrop photo={photo} shape="whole" crop={CENTERED} print={print} />
+            <PhotoCrop photo={photo} fit={false} crop={CENTERED} print={print} />
           )}
         </div>
       )}

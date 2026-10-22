@@ -72,7 +72,7 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
   const page = area ? fitPage(area, sheet) : null
   const pxPerInch = page ? page.width / sheet.width : 0
 
-  const editable = selected !== null && selected.shape !== 'whole'
+  const editable = selected !== null && selected.fit
   const selectedPlacement = current?.placements.find((placement) => placement.key === selectedId)
 
   function pan(dxScreen: number, dyScreen: number) {
@@ -176,7 +176,7 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
             const isSelected = item.id === selectedId
             const print = itemDimensions(item, paper)
             const crop = itemCrop(item)
-            const ghost = isSelected && panning && item.shape !== 'whole'
+            const ghost = isSelected && panning && item.fit
             return (
               <div
                 key={`${placement.key}-${index}`}
@@ -204,7 +204,7 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
                       style={photoPlacement(item.photo, cropRect(item.photo, print.width / print.height, crop))}
                     />
                   )}
-                  <PhotoCrop photo={item.photo} shape={item.shape} crop={crop} print={print} />
+                  <PhotoCrop photo={item.photo} fit={item.fit} crop={crop} print={print} />
                 </div>
               </div>
             )

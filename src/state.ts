@@ -1,4 +1,4 @@
-import { CENTERED, naturalShape, printDimensions, type Crop, type CropShape, type Dimensions, type Shape } from './lib/crop'
+import { CENTERED, naturalShape, printDimensions, type Crop, type Dimensions, type Shape } from './lib/crop'
 import type { Piece } from './lib/layout'
 import type { PaperId } from './lib/paper'
 import type { Photo } from './lib/photo'
@@ -11,8 +11,10 @@ export interface PrintItem {
   photo: Photo
   sizeId: SizeId
   shape: Shape
-  /** Each crop shape keeps its own position, so switching shapes back and forth loses nothing. */
-  crops: Record<CropShape, Crop>
+  /** Fill the frame with the photo, cropped. Off puts the whole photo inside the frame on white. */
+  fit: boolean
+  /** Each shape keeps its own crop, so switching back and forth loses nothing. */
+  crops: Record<Shape, Crop>
   copies: number
 }
 
@@ -30,7 +32,8 @@ export type Action =
   | { type: 'select'; id: string }
   | { type: 'setSize'; id: string; sizeId: SizeId }
   | { type: 'setShape'; id: string; shape: Shape }
-  | { type: 'setCrop'; id: string; shape: CropShape; crop: Crop }
+  | { type: 'setCrop'; id: string; shape: Shape; crop: Crop }
+  | { type: 'setFit'; id: string; fit: boolean }
   | { type: 'setCopies'; id: string; copies: number }
   | { type: 'setPaper'; paperId: PaperId }
   | { type: 'setDefaultSize'; sizeId: SizeId }
@@ -47,6 +50,7 @@ export function reducer(state: AppState, action: Action): AppState {
         photo: action.photo,
         sizeId: state.sizeId,
         shape: naturalShape(action.photo),
+        fit: true,
         crops: { wide: CENTERED, tall: CENTERED },
         copies: 1,
       }
@@ -67,6 +71,8 @@ export function reducer(state: AppState, action: Action): AppState {
       return update(state, action.id, (item) => ({ ...item, shape: action.shape }))
     case 'setCrop':
       return update(state, action.id, (item) => ({ ...item, crops: { ...item.crops, [action.shape]: action.crop } }))
+    case 'setFit':
+      return update(state, action.id, (item) => ({ ...item, fit: action.fit }))
     case 'setCopies':
       return update(state, action.id, (item) => ({
         ...item,
@@ -80,11 +86,11 @@ export function reducer(state: AppState, action: Action): AppState {
 }
 
 export function itemCrop(item: PrintItem): Crop {
-  return item.shape === 'whole' ? CENTERED : item.crops[item.shape]
+  return item.crops[item.shape]
 }
 
 export function itemDimensions(item: PrintItem, paper: Dimensions) {
-  return printDimensions(getSize(item.sizeId, paper), item.shape, item.photo)
+  return printDimensions(getSize(item.sizeId, paper), item.shape)
 }
 
 /** Every copy of every photo, in order, keyed by its item so copies share one image. */

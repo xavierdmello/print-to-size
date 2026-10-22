@@ -44,3 +44,13 @@ Each size in the list is a little sheet of paper laid out the way that size prin
 
 The sample is our own drawing (`src/components/sample-photo.svg`), not Microsoft's image.
 
+## "Fit picture to frame" instead of a "Whole photo" shape
+
+Shape is just **Wide** or **Tall**, and a **Fit picture to frame** checkbox in the bottom bar (on by default) decides whether the photo fills the frame, cropped, or sits whole inside it with white space. This replaces a third shape button, "Whole photo".
+
+**Why**
+
+- **They are two separate choices.** Which way the frame stands and whether the photo gets cropped are independent. "Whole photo" mixed them up, picked the orientation for you, and couldn't put a whole photo in a frame standing the other way.
+- **It's the Windows 7 control, word for word.** Its "Fit picture to frame" checkbox is clear to people who've used it, and the preview updates the moment it's ticked or unticked, so anyone who reads "fit" the other way sees the result straight away.
+- **Nothing hides.** With the box unticked, or no photo yet, the crop buttons grey out in place rather than disappearing. They sit under the preview, where Windows 7 puts its page arrows, which keeps the bottom bar to Copies and this checkbox.
+

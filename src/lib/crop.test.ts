@@ -17,13 +17,8 @@ const fourBySix = getSize('4x6', getPaper('letter'))
 
 describe('printDimensions', () => {
   it('lays the long side horizontally for wide and vertically for tall', () => {
-    expect(printDimensions(fourBySix, 'wide', iphone)).toEqual({ width: 6, height: 4 })
-    expect(printDimensions(fourBySix, 'tall', iphone)).toEqual({ width: 4, height: 6 })
-  })
-
-  it('follows the photo for a whole-photo print', () => {
-    expect(printDimensions(fourBySix, 'whole', iphone)).toEqual({ width: 6, height: 4 })
-    expect(printDimensions(fourBySix, 'whole', tallPhone)).toEqual({ width: 4, height: 6 })
+    expect(printDimensions(fourBySix, 'wide')).toEqual({ width: 6, height: 4 })
+    expect(printDimensions(fourBySix, 'tall')).toEqual({ width: 4, height: 6 })
   })
 })
 

@@ -12,7 +12,7 @@ export async function makeSheetPdf(items: readonly PrintItem[], paperId: PaperId
   for (const item of items) {
     images.set(
       item.id,
-      await renderPrint(item.photo.bitmap, item.photo, getSize(item.sizeId, paper), item.shape, itemCrop(item)),
+      await renderPrint(item.photo.bitmap, item.photo, getSize(item.sizeId, paper), item.shape, itemCrop(item), item.fit),
     )
   }
   return buildPdf(pages, images)
