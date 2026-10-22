@@ -58,7 +58,7 @@ export function useSmartCrop(
         const current = item.crops[shape]
         const previous = applied.current.get(key)
         if (!same(current, CENTERED) && !(previous && same(current, previous))) continue
-        const print = printDimensions(getSize(item.sizeId, paper), shape)
+        const print = printDimensions(getSize(item.sizeId, paper, item.custom), shape)
         const suggested = nudgeForFaces(item.photo, print.width / print.height, CENTERED, found)
         applied.current.set(key, suggested)
         if (!same(current, suggested)) dispatch({ type: 'setCrop', id: item.id, shape, crop: suggested })

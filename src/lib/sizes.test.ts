@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { PAGE_MARGIN, layoutSheets } from './layout'
 import { getPaper } from './paper'
-import { getSize, sizeForPaper, sizesFor } from './sizes'
+import { MIN_CUSTOM, getSize, isSizeId, sizeForPaper, sizesFor } from './sizes'
 
 const letter = getPaper('letter')
 const a4 = getPaper('a4')
@@ -60,6 +60,33 @@ describe('sizes for each paper', () => {
     expect(sizeForPaper('9x13', 'letter')).toBe('3.5x5')
     expect(sizeForPaper('full', 'a4')).toBe('full')
     expect(sizeForPaper('wallet', 'letter')).toBe('wallet')
+  })
+})
+
+describe('extra and custom sizes', () => {
+  it('adds square and passport sizes for each paper when asked', () => {
+    expect(sizesFor('letter', { extras: true }).slice(-4)).toEqual(['4x4', '5x5', '8x8', 'passport-us'])
+    expect(sizesFor('a4', { extras: true }).slice(-4)).toEqual(['10x10', '13x13', '20x20', 'passport-eu'])
+    expect(getSize('passport-eu', a4).long * 25.4).toBeCloseTo(45)
+  })
+
+  it('swaps square and passport sizes for their counterparts too', () => {
+    expect(sizeForPaper('5x5', 'a4')).toBe('13x13')
+    expect(sizeForPaper('passport-eu', 'letter')).toBe('passport-us')
+    expect(sizeForPaper('custom', 'a4')).toBe('custom')
+  })
+
+  it('keeps a custom size practical and on the paper', () => {
+    expect(getSize('custom', letter, { short: 3, long: 5 })).toMatchObject({ short: 3, long: 5 })
+    expect(getSize('custom', letter, { short: 0.2, long: 0.5 })).toMatchObject({ short: MIN_CUSTOM, long: MIN_CUSTOM })
+    expect(getSize('custom', letter, { short: 20, long: 30 })).toMatchObject({ short: 8.25, long: 10.75 })
+  })
+
+  it('recognises every size it offers', () => {
+    for (const id of [...sizesFor('letter', { extras: true }), ...sizesFor('a4', { extras: true }), 'custom']) {
+      expect(isSizeId(id)).toBe(true)
+    }
+    expect(isSizeId('6x9')).toBe(false)
   })
 })
 
