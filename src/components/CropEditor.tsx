@@ -1,0 +1,127 @@
+import { useEffect, useEffectEvent, useRef, type KeyboardEvent, type PointerEvent } from 'react'
+import { CENTERED, cropRect, panCrop, zoomCrop, type Crop, type Dimensions } from '../lib/crop'
+import { itemCrop, itemDimensions, type PrintItem } from '../state'
+import { PhotoCrop } from './PhotoCrop'
+import { NUDGE, ZOOM_STEP, photoPlacement } from './placement'
+import { useElementSize } from './useElementSize'
+
+interface CropEditorProps {
+  item: PrintItem
+  onCrop: (crop: Crop) => void
+}
+
+function fitWindow(stage: Dimensions, aspect: number): Dimensions {
+  const padding = Math.min(56, Math.max(20, stage.width * 0.07))
+  const width = Math.min(stage.width - padding * 2, (stage.height - padding * 2) * aspect)
+  return { width: Math.max(0, width), height: Math.max(0, width / aspect) }
+}
+
+export function CropEditor({ item, onCrop }: CropEditorProps) {
+  const stageRef = useRef<HTMLDivElement>(null)
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const stage = useElementSize(stageRef)
+  const { photo } = item
+  const print = itemDimensions(item)
+  const aspect = print.width / print.height
+  const crop = itemCrop(item)
+  const rect = cropRect(photo, aspect, crop)
+  const frame = stage ? fitWindow(stage, aspect) : null
+  const editable = item.shape !== 'whole'
+
+  function pan(dxScreen: number, dyScreen: number) {
+    if (!frame) return
+    const scale = rect.width / frame.width
+    onCrop(panCrop(photo, aspect, crop, dxScreen * scale, dyScreen * scale))
+  }
+
+  function zoom(factor: number) {
+    onCrop(zoomCrop(photo, aspect, crop, factor))
+  }
+
+  // Trackpad pinches arrive as wheel events with ctrlKey set and small deltas.
+  const onWheel = useEffectEvent((event: WheelEvent) => {
+    event.preventDefault()
+    zoom(Math.exp(-event.deltaY * (event.ctrlKey ? 0.01 : 0.0015)))
+  })
+
+  useEffect(() => {
+    const element = stageRef.current
+    if (!element || !editable) return
+    element.addEventListener('wheel', onWheel, { passive: false })
+    return () => element.removeEventListener('wheel', onWheel)
+  }, [editable])
+
+  function onPointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (!editable) return
+    event.currentTarget.setPointerCapture(event.pointerId)
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+  }
+
+  function onPointerMove(event: PointerEvent<HTMLDivElement>) {
+    const previous = pointers.current.get(event.pointerId)
+    if (!previous) return
+    const current = { x: event.clientX, y: event.clientY }
+
+    if (pointers.current.size === 1) {
+      pan(current.x - previous.x, current.y - previous.y)
+    } else {
+      const [other] = [...pointers.current].filter(([id]) => id !== event.pointerId).map(([, p]) => p)
+      const before = Math.hypot(previous.x - other.x, previous.y - other.y)
+      const after = Math.hypot(current.x - other.x, current.y - other.y)
+      if (before > 0) zoom(after / before)
+    }
+    pointers.current.set(event.pointerId, current)
+  }
+
+  function onPointerUp(event: PointerEvent<HTMLDivElement>) {
+    pointers.current.delete(event.pointerId)
+  }
+
+  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (!editable || !frame) return
+    const step = { x: frame.width * NUDGE, y: frame.height * NUDGE }
+    const moves: Record<string, () => void> = {
+      ArrowLeft: () => pan(-step.x, 0),
+      ArrowRight: () => pan(step.x, 0),
+      ArrowUp: () => pan(0, -step.y),
+      ArrowDown: () => pan(0, step.y),
+      '+': () => zoom(ZOOM_STEP),
+      '=': () => zoom(ZOOM_STEP),
+      '-': () => zoom(1 / ZOOM_STEP),
+      '0': () => onCrop(CENTERED),
+    }
+    const move = moves[event.key]
+    if (move) {
+      event.preventDefault()
+      move()
+    }
+  }
+
+  return (
+    <div
+      ref={stageRef}
+      className={`crop-stage${editable ? ' is-editable' : ''}`}
+      tabIndex={editable ? 0 : -1}
+      role={editable ? 'application' : undefined}
+      aria-label={editable ? 'Photo crop. Drag or use the arrow keys to move the photo, plus and minus to zoom.' : undefined}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      onKeyDown={onKeyDown}
+    >
+      {frame && (
+        <div className="crop-window" style={{ width: frame.width, height: frame.height }}>
+          {editable ? (
+            <>
+              <img className="crop-photo" src={photo.url} alt="" draggable={false} style={photoPlacement(photo, rect)} />
+              <div className="crop-shade" />
+            </>
+          ) : (
+            <PhotoCrop photo={photo} shape="whole" crop={CENTERED} print={print} />
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
