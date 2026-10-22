@@ -48,9 +48,11 @@ export default function App() {
   useEffect(() => writeSetting('paper', state.paperId), [state.paperId])
   useEffect(() => writeSetting('size', state.sizeId), [state.sizeId])
 
+  // Takes a copy of the files up front: the browser empties a file input's or drop's list once the event is over.
   const addFiles = useCallback(async (files: Iterable<File>) => {
+    const photos = [...files]
     setError(null)
-    for (const file of files) {
+    for (const file of photos) {
       if (!looksLikePhoto(file)) {
         setError(`${file.name} isn't a photo. Choose a JPEG, PNG or HEIC file.`)
         continue
