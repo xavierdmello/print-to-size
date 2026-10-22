@@ -15,7 +15,7 @@ import { snapFrame, unitFor, type SnappedFrame } from './onPhoto/measure'
 import { PhotoOverlay } from './onPhoto/PhotoOverlay'
 import { useCropIntro } from './onPhoto/useCropIntro'
 import { SizeFields } from './sizes/SizeFields'
-import { describeSize, snapTargets, visibleSizes } from './sizes/sizeOptions'
+import { snapTargets, visibleSizes } from './sizes/sizeOptions'
 
 export function useExperiments(
   flags: DevFlags,
@@ -57,7 +57,7 @@ export function useExperiments(
       )
     : undefined
 
-  /** Picking Custom starts from the photo's current size, so nothing jumps. */
+  /** Picking Custom size starts from the photo's current size, so nothing jumps. */
   function chooseSize(sizeId: SizeId): boolean {
     if (sizeId !== 'custom' || !item || item.sizeId === 'custom') return false
     const { short, long } = getSize(item.sizeId, paper, item.custom)
@@ -83,17 +83,16 @@ export function useExperiments(
     sizeList: {
       sizeIds: visibleSizes(flags, paper, item),
       custom: item?.custom,
-      describe: (size: Parameters<typeof describeSize>[0]) => describeSize(size, paper, item),
+      footer: flags.customSize ? (
+        <SizeFields
+          key={item?.id ?? 'none'}
+          item={item}
+          paper={paper}
+          resolve={previewResize}
+          onChange={(frame) => item && setFrame(item, frame)}
+        />
+      ) : null,
     },
-    sizeFields: flags.customSize ? (
-      <SizeFields
-        key={item?.id ?? 'none'}
-        item={item}
-        paper={paper}
-        resolve={previewResize}
-        onChange={(frame) => item && setFrame(item, frame)}
-      />
-    ) : null,
     chooseSize,
   }
 }

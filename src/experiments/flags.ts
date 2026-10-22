@@ -39,7 +39,7 @@ const DEFAULTS: DevFlags = {
   sizeMarks: true,
   shapeSwitch: true,
   moreSizes: false,
-  customSize: false,
+  customSize: true,
   dragResize: false,
 }
 

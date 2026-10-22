@@ -124,7 +124,7 @@ export function getSize(id: SizeId, paper: Dimensions, custom: CustomSize = DEFA
     const largest = largestSize(paper)
     const short = Math.min(Math.max(custom.short, MIN_CUSTOM), largest.short)
     const long = Math.min(Math.max(custom.long, short), largest.long)
-    return { id, label: 'Custom', short, long }
+    return { id, label: 'Custom size', short, long }
   }
   return { id, ...FIXED[id] }
 }

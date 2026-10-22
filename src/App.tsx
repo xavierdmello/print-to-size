@@ -276,7 +276,6 @@ export default function App() {
           />
           Fit picture to frame
         </label>
-        {experiments.sizeFields}
         <div className="options-end">
           {flags.realSize && item && <RealSizeButton item={item} paper={paper} framed={frameCropProps(flags).className} />}
           <button type="button" className="link-button" disabled={!item} onClick={() => item && removeItem(item)}>

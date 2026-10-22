@@ -41,7 +41,7 @@ This repo is a prototype. Besides the core app it contains UI experiments that s
 | Wide/tall switch | **on** | A button at the photo's corner that switches the frame between wide and tall |
 | Drag edges to resize | off | Handles on the photo's edges; dragging resizes it, snapping to standard sizes or becoming Custom |
 | Square and passport sizes | off | 4×4, 5×5, 8×8 in. and 2×2 in. passport (10×10, 13×13, 20×20 cm and 35×45 mm on A4) |
-| Custom size | off | Width and height boxes in the bottom bar; typing a size snaps to a standard one or becomes Custom, which joins the size list |
+| Custom size | **on** | Width and height boxes pinned under the size list; typing a size snaps to a standard one or becomes Custom size, which joins the list |
 | Frame crop | off | Crop by sliding the photo behind a drawn picture frame instead of on the page |
 | Real size | off | Show the print at its true physical size on screen, after a one-time calibration against a bank card |
 | Smart crop | off | Start the crop centred, but shift it just enough to avoid cutting through a face (on-device face detection) |

@@ -2,9 +2,9 @@
  * EXPERIMENT: throwaway UI test behind a dev-only switch (see README, "Experiments").
  * Not a pattern to build on. Delete it, or rebuild the winning idea properly in the core app.
  *
- * Width and height boxes for the selected photo, in the bottom bar. They always show its
- * printed size; typing a new one lands on a standard size when it's close, as dragging an edge
- * does, and becomes Custom otherwise. Greyed out until there's a photo.
+ * Width and height boxes for the selected photo, pinned under the size list. They always show
+ * its printed size; typing a new one lands on a standard size when it's close, as dragging an
+ * edge does, and becomes Custom size otherwise. Greyed out until there's a photo.
  */
 import { useState } from 'react'
 import type { Paper } from '../../lib/paper'
@@ -41,7 +41,7 @@ export function SizeFields({ item, paper, resolve, onChange }: SizeFieldsProps) 
   const unitName = unit === 'cm' ? 'centimetres' : 'inches'
 
   return (
-    <div className="field size-fields" role="group" aria-labelledby="size-fields-label" onBlur={() => setDraft(null)}>
+    <div className="size-fields" role="group" aria-labelledby="size-fields-label" onBlur={() => setDraft(null)}>
       <span id="size-fields-label">Size:</span>
       <input
         id="size-width"
