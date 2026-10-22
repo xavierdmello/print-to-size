@@ -42,6 +42,7 @@ export default function App() {
   const item = state.items.find((candidate) => candidate.id === state.selectedId) ?? null
   const paper = getPaper(state.paperId)
   const pages = useMemo(() => layoutSheets(sheetPieces(state.items), paper), [state.items, paper])
+  const itemRotated = pages.some((page) => page.placements.some((p) => p.key === item?.id && p.rotated))
 
   useEffect(() => writeSetting('paper', state.paperId), [state.paperId])
   useEffect(() => writeSetting('size', state.sizeId), [state.sizeId])
@@ -233,7 +234,7 @@ export default function App() {
             </button>
           </div>
         </div>
-        <AdjustPad item={item} onCrop={(crop) => item && setCrop(item, crop)} />
+        <AdjustPad item={item} rotated={itemRotated && !flags.frameCrop} onCrop={(crop) => item && setCrop(item, crop)} />
         <div className="options-end">
           {flags.realSize && item && <RealSizeButton item={item} framed={frameCropProps(flags).className} />}
           {item && (

@@ -13,7 +13,7 @@ import type { Placement, SheetPage } from '../lib/layout'
 import type { Paper } from '../lib/paper'
 import { itemCrop, itemDimensions, type PrintItem } from '../state'
 import { PhotoCrop } from './PhotoCrop'
-import { NUDGE, ZOOM_STEP, photoPlacement } from './placement'
+import { NUDGE, ZOOM_STEP, photoPlacement, screenToPhoto } from './placement'
 import { useElementSize } from './useElementSize'
 
 interface PageEditorProps {
@@ -77,8 +77,7 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
     const print = itemDimensions(selected)
     const aspect = print.width / print.height
     const crop = itemCrop(selected)
-    // Rotated pieces turn screen movement a quarter turn back into the upright photo.
-    const [dx, dy] = selectedPlacement.rotated ? [-dyScreen, dxScreen] : [dxScreen, dyScreen]
+    const [dx, dy] = screenToPhoto(dxScreen, dyScreen, selectedPlacement.rotated)
     const scale = cropRect(selected.photo, aspect, crop).width / (print.width * pxPerInch)
     onCrop(selected, panCrop(selected.photo, aspect, crop, dx * scale, dy * scale))
   }
@@ -138,11 +137,12 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (!selected || !editable || !selectedPlacement) return
     const step = (selectedPlacement.rotated ? selectedPlacement.height : selectedPlacement.width) * pxPerInch * NUDGE
+    // Arrow keys move the crop over the photo, so the photo itself moves the other way.
     const keys: Record<string, () => void> = {
-      ArrowLeft: () => pan(-step, 0),
-      ArrowRight: () => pan(step, 0),
-      ArrowUp: () => pan(0, -step),
-      ArrowDown: () => pan(0, step),
+      ArrowLeft: () => pan(step, 0),
+      ArrowRight: () => pan(-step, 0),
+      ArrowUp: () => pan(0, step),
+      ArrowDown: () => pan(0, -step),
       '+': () => zoom(ZOOM_STEP),
       '=': () => zoom(ZOOM_STEP),
       '-': () => zoom(1 / ZOOM_STEP),
@@ -163,7 +163,7 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
           className="page"
           style={{ width: page.width, height: page.height }}
           tabIndex={editable ? 0 : -1}
-          aria-label={editable ? 'Page. Arrow keys move the selected photo, plus and minus zoom.' : 'Page'}
+          aria-label={editable ? 'Page. Drag the selected photo, or use the arrow keys to move its crop and plus and minus to zoom.' : 'Page'}
           onKeyDown={onKeyDown}
         >
           {!current && empty}

@@ -94,10 +94,10 @@ export function CropEditor({ item, onCrop, className, room = 0.07 }: CropEditorP
     if (!editable || !frame) return
     const step = { x: frame.width * NUDGE, y: frame.height * NUDGE }
     const moves: Record<string, () => void> = {
-      ArrowLeft: () => pan(-step.x, 0),
-      ArrowRight: () => pan(step.x, 0),
-      ArrowUp: () => pan(0, -step.y),
-      ArrowDown: () => pan(0, step.y),
+      ArrowLeft: () => pan(step.x, 0),
+      ArrowRight: () => pan(-step.x, 0),
+      ArrowUp: () => pan(0, step.y),
+      ArrowDown: () => pan(0, -step.y),
       '+': () => zoom(ZOOM_STEP),
       '=': () => zoom(ZOOM_STEP),
       '-': () => zoom(1 / ZOOM_STEP),
@@ -116,7 +116,7 @@ export function CropEditor({ item, onCrop, className, room = 0.07 }: CropEditorP
       className={['crop-stage', editable && 'is-editable', dragging && 'is-panning', className].filter(Boolean).join(' ')}
       tabIndex={editable ? 0 : -1}
       role={editable ? 'application' : undefined}
-      aria-label={editable ? 'Photo crop. Drag or use the arrow keys to move the photo, plus and minus to zoom.' : undefined}
+      aria-label={editable ? 'Photo crop. Drag the photo, or use the arrow keys to move the crop and plus and minus to zoom.' : undefined}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}

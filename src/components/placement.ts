@@ -1,10 +1,18 @@
 import type { CSSProperties } from 'react'
 import { fitRect, type Dimensions, type Rect } from '../lib/crop'
 
-/** How far one arrow press moves the photo, as a fraction of the crop. */
+/** How far one arrow press moves the crop, as a fraction of its size. */
 export const NUDGE = 0.06
 /** How much one zoom step changes the crop. */
 export const ZOOM_STEP = 1.2
+
+/**
+ * Turns a movement on screen into the same movement on the upright photo. Photos the
+ * layout turned sideways are shown a quarter turn anticlockwise, so their movement turns back.
+ */
+export function screenToPhoto(dx: number, dy: number, rotated: boolean): [number, number] {
+  return rotated ? [-dy, dx] : [dx, dy]
+}
 
 /** Positions the photo inside its box, as percentages of the box, so `rect` fills it. */
 export function photoPlacement(photo: Dimensions, rect: Rect): CSSProperties {
