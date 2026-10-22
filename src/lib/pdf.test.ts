@@ -37,7 +37,7 @@ describe('imageDrawArgs', () => {
 describe('buildPdf', () => {
   it('makes one page per sheet at the paper size', async () => {
     const pages = layoutSheets(
-      [1, 2, 3].map((n) => ({ key: `p${n}`, width: 6, height: 4 })),
+      [1, 2, 3, 4].map((n) => ({ key: `p${n}`, width: 6, height: 4 })),
       letter,
     )
     const images = new Map(pages.flatMap((p) => p.placements).map((p) => [p.key, JPEG]))

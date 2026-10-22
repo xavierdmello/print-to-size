@@ -16,10 +16,10 @@ function overlaps(a: Placement, b: Placement): boolean {
 function expectValidPages(pages: ReturnType<typeof layoutSheets>, paper = letter) {
   for (const { placements } of pages) {
     for (const p of placements) {
-      expect(p.x).toBeGreaterThanOrEqual(PAGE_MARGIN - 1e-9)
-      expect(p.y).toBeGreaterThanOrEqual(PAGE_MARGIN - 1e-9)
-      expect(p.x + p.width).toBeLessThanOrEqual(paper.width - PAGE_MARGIN + 1e-9)
-      expect(p.y + p.height).toBeLessThanOrEqual(paper.height - PAGE_MARGIN + 1e-9)
+      expect(p.x).toBeGreaterThanOrEqual(PAGE_MARGIN.x - 1e-9)
+      expect(p.y).toBeGreaterThanOrEqual(PAGE_MARGIN.y - 1e-9)
+      expect(p.x + p.width).toBeLessThanOrEqual(paper.width - PAGE_MARGIN.x + 1e-9)
+      expect(p.y + p.height).toBeLessThanOrEqual(paper.height - PAGE_MARGIN.y + 1e-9)
     }
     placements.forEach((a, i) =>
       placements.slice(i + 1).forEach((b) => expect(overlaps(a, b)).toBe(false)),
@@ -40,9 +40,10 @@ describe('layoutSheets', () => {
     expectValidPages(pages)
   })
 
-  it('starts a new page when one is full', () => {
-    const pages = layoutSheets(pieces(3, 6, 4), letter)
-    expect(pages.map((p) => p.placements.length)).toEqual([2, 1])
+  it('fits three 4×6 photos on one Letter page and starts a new page when full', () => {
+    const pages = layoutSheets(pieces(4, 6, 4), letter)
+    expect(pages.map((p) => p.placements.length)).toEqual([3, 1])
+    expectValidPages(pages)
   })
 
   it('rotates a photo only when that is what makes it fit', () => {
@@ -50,6 +51,13 @@ describe('layoutSheets', () => {
     expect(page.placements[0]).toMatchObject({ width: 8, height: 10, rotated: true })
     const [upright] = layoutSheets(pieces(1, 4, 6), letter)
     expect(upright.placements[0].rotated).toBe(false)
+  })
+
+  it('turns photos when that fits more on a page', () => {
+    const pages = layoutSheets(pieces(2, 5, 7), letter)
+    expect(pages).toHaveLength(1)
+    expect(pages[0].placements.every((p) => p.rotated)).toBe(true)
+    expectValidPages(pages)
   })
 
   it('fits an 8×10 on A4', () => {
