@@ -586,17 +586,47 @@ button:disabled {
     background: var(--surface);
   }
 
+  .workspace {
+    padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  }
+
   .actions {
-    position: sticky;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    right: 0;
     bottom: 0;
-    margin-left: calc(-1 * var(--gutter-left));
-    margin-right: calc(-1 * var(--gutter-right));
     padding-top: 12px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     padding-left: var(--gutter-left);
     padding-right: var(--gutter-right);
     border-top: 1px solid var(--line);
     background: var(--bg);
+  }
+
+  .adjust-pad {
+    gap: 16px;
+  }
+
+  .adjust-moves {
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+  }
+
+  .adjust-moves .icon-button,
+  .adjust-zoom .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .adjust-zoom {
+    gap: 4px;
+  }
+}
+
+@media (pointer: coarse) {
+  .empty-hint {
+    display: none;
   }
 
   .sheet {

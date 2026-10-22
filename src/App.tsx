@@ -36,10 +36,19 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
+  const panel = useRef<HTMLElement>(null)
 
   const item = state.items.find((candidate) => candidate.id === state.selectedId) ?? null
   const paper = getPaper(state.paperId)
   const pages = useMemo(() => layoutSheets(sheetPieces(state.items), paper), [state.items, paper])
+
+  // A newly added photo is selected; bring its size and shape controls back into view.
+  const itemCount = state.items.length
+  const previousCount = useRef(itemCount)
+  useEffect(() => {
+    if (itemCount > previousCount.current) panel.current?.scrollTo({ top: 0 })
+    previousCount.current = itemCount
+  }, [itemCount])
 
   useEffect(() => writeSetting('paper', state.paperId), [state.paperId])
   useEffect(() => writeSetting('size', state.sizeId), [state.sizeId])
@@ -178,7 +187,7 @@ export default function App() {
             </div>
           </section>
 
-          <aside className="panel">
+          <aside className="panel" ref={panel}>
             <section className="panel-section">
               <h2>Size</h2>
               <SizeChoices item={item} onChange={(sizeId) => dispatch({ type: 'setSize', id: item.id, sizeId })} />
