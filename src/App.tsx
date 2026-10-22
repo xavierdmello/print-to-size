@@ -46,7 +46,7 @@ export default function App() {
   const itemRotated = pages.some((page) => page.placements.some((p) => p.key === item?.id && p.rotated))
 
   const smartCropStatus = useSmartCrop(state.items, paper, flags.smartCrop, dispatch)
-  const experiments = useExperiments(flags, paper, state.items, item, dispatch)
+  const experiments = useExperiments(flags, paper, state.items, item, state.sizeId, dispatch)
 
   useEffect(() => writeSetting('paper', state.paperId), [state.paperId])
   useEffect(() => writeSetting('size', state.sizeId), [state.sizeId])

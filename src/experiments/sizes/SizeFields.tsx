@@ -4,15 +4,20 @@
  *
  * Width and height boxes for the selected photo, pinned under the size list. They always show
  * its printed size; typing a new one lands on a standard size when it's close, as dragging an
- * edge does, and becomes Custom size otherwise. Greyed out until there's a photo.
+ * edge does, and becomes Custom size otherwise. Greyed out until there's a photo, showing the
+ * size picked in the list.
  */
 import { useState } from 'react'
+import { printDimensions } from '../../lib/crop'
 import type { Paper } from '../../lib/paper'
+import { getSize, type SizeId } from '../../lib/sizes'
 import { roundToUnit, unitFor, type SnappedFrame } from '../onPhoto/measure'
 import { itemDimensions, type PrintItem } from '../../state'
 
 interface SizeFieldsProps {
   item: PrintItem | null
+  /** The size picked in the list, shown while there's no photo. */
+  sizeId: SizeId
   paper: Paper
   /** How a frame of `width` × `height` inches would land. */
   resolve: (width: number, height: number) => SnappedFrame
@@ -21,14 +26,14 @@ interface SizeFieldsProps {
 
 const PER_INCH = { in: 1, cm: 2.54 }
 
-export function SizeFields({ item, paper, resolve, onChange }: SizeFieldsProps) {
+export function SizeFields({ item, sizeId, paper, resolve, onChange }: SizeFieldsProps) {
   const unit = unitFor(paper.id)
-  const print = item ? itemDimensions(item, paper) : null
+  const print = item ? itemDimensions(item, paper) : printDimensions(getSize(sizeId, paper), 'wide')
   const toField = (inches: number) => String(Math.round(roundToUnit(inches, unit) * PER_INCH[unit] * 100) / 100)
 
   // What's typed is kept as typed while the box has focus, so half-typed values don't jump.
   const [draft, setDraft] = useState<{ width: string; height: string } | null>(null)
-  const shown = draft ?? (print ? { width: toField(print.width), height: toField(print.height) } : { width: '', height: '' })
+  const shown = draft ?? { width: toField(print.width), height: toField(print.height) }
 
   function change(next: { width: string; height: string }) {
     setDraft(next)

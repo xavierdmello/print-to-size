@@ -22,6 +22,8 @@ export function useExperiments(
   paper: Paper,
   items: readonly PrintItem[],
   item: PrintItem | null,
+  /** The size picked in the list before there's a photo. */
+  sizeId: SizeId,
   dispatch: Dispatch<Action>,
 ) {
   const { introId, endIntro } = useCropIntro(items, flags.cropIntro)
@@ -87,6 +89,7 @@ export function useExperiments(
         <SizeFields
           key={item?.id ?? 'none'}
           item={item}
+          sizeId={sizeId}
           paper={paper}
           resolve={previewResize}
           onChange={(frame) => item && setFrame(item, frame)}

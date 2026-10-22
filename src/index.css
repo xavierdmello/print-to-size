@@ -163,7 +163,7 @@ select {
 
 .dialog-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 176px;
+  grid-template-columns: minmax(0, 1fr) 208px;
   min-height: 0;
   background: var(--content);
 }
