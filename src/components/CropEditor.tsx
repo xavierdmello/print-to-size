@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef, type KeyboardEvent, type PointerEvent } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
 import { CENTERED, cropRect, panCrop, zoomCrop, type Crop, type Dimensions } from '../lib/crop'
 import { itemCrop, itemDimensions, type PrintItem } from '../state'
 import { PhotoCrop } from './PhotoCrop'
@@ -8,24 +8,28 @@ import { useElementSize } from './useElementSize'
 interface CropEditorProps {
   item: PrintItem
   onCrop: (crop: Crop) => void
+  className?: string
+  /** Space kept around the crop, as a fraction of the stage width. */
+  room?: number
 }
 
-function fitWindow(stage: Dimensions, aspect: number): Dimensions {
-  const padding = Math.min(56, Math.max(20, stage.width * 0.07))
+function fitWindow(stage: Dimensions, aspect: number, room: number): Dimensions {
+  const padding = Math.max(20, stage.width * room)
   const width = Math.min(stage.width - padding * 2, (stage.height - padding * 2) * aspect)
   return { width: Math.max(0, width), height: Math.max(0, width / aspect) }
 }
 
-export function CropEditor({ item, onCrop }: CropEditorProps) {
+export function CropEditor({ item, onCrop, className, room = 0.07 }: CropEditorProps) {
   const stageRef = useRef<HTMLDivElement>(null)
   const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const [dragging, setDragging] = useState(false)
   const stage = useElementSize(stageRef)
   const { photo } = item
   const print = itemDimensions(item)
   const aspect = print.width / print.height
   const crop = itemCrop(item)
   const rect = cropRect(photo, aspect, crop)
-  const frame = stage ? fitWindow(stage, aspect) : null
+  const frame = stage ? fitWindow(stage, aspect, room) : null
   const editable = item.shape !== 'whole'
 
   function pan(dxScreen: number, dyScreen: number) {
@@ -55,6 +59,7 @@ export function CropEditor({ item, onCrop }: CropEditorProps) {
     if (!editable) return
     event.currentTarget.setPointerCapture(event.pointerId)
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    setDragging(true)
   }
 
   function onPointerMove(event: PointerEvent<HTMLDivElement>) {
@@ -75,6 +80,7 @@ export function CropEditor({ item, onCrop }: CropEditorProps) {
 
   function onPointerUp(event: PointerEvent<HTMLDivElement>) {
     pointers.current.delete(event.pointerId)
+    if (pointers.current.size === 0) setDragging(false)
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -100,7 +106,7 @@ export function CropEditor({ item, onCrop }: CropEditorProps) {
   return (
     <div
       ref={stageRef}
-      className={`crop-stage${editable ? ' is-editable' : ''}`}
+      className={['crop-stage', editable && 'is-editable', dragging && 'is-panning', className].filter(Boolean).join(' ')}
       tabIndex={editable ? 0 : -1}
       role={editable ? 'application' : undefined}
       aria-label={editable ? 'Photo crop. Drag or use the arrow keys to move the photo, plus and minus to zoom.' : undefined}
@@ -111,7 +117,11 @@ export function CropEditor({ item, onCrop }: CropEditorProps) {
       onKeyDown={onKeyDown}
     >
       {frame && (
-        <div className="crop-window" style={{ width: frame.width, height: frame.height }}>
+        <div
+          className="crop-window"
+          // Screen pixels per printed inch, for anything drawn at a physical size around the crop.
+          style={{ width: frame.width, height: frame.height, '--ppi': `${frame.width / print.width}px` } as CSSProperties}
+        >
           {editable ? (
             <>
               <img className="crop-photo" src={photo.url} alt="" draggable={false} style={photoPlacement(photo, rect)} />

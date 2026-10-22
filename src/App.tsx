@@ -5,6 +5,9 @@ import { AlertIcon, MinusIcon, PhotoIcon, PlusIcon, PrinterIcon, TrashIcon } fro
 import { ShapeChoices } from './components/ShapeChoices'
 import { SheetPreview } from './components/SheetPreview'
 import { SizeChoices } from './components/SizeChoices'
+import { DevPanel } from './experiments/DevPanel'
+import { DEV_MODE, useDevFlags } from './experiments/flags'
+import { frameCropProps } from './experiments/frameCrop'
 import { effectiveDpi } from './lib/crop'
 import { layoutSheets } from './lib/layout'
 import { PAPERS, defaultPaperFor, getPaper, isPaperId } from './lib/paper'
@@ -32,6 +35,7 @@ function initialState(): AppState {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState)
+  const [flags, setFlags] = useDevFlags()
   const [busy, setBusy] = useState<'print' | 'save' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -131,7 +135,7 @@ export default function App() {
         : null
 
   return (
-    <div className={`app${dragging ? ' is-dragging' : ''}`}>
+    <div className={`app${dragging ? ' is-drop-target' : ''}`}>
       <header className="topbar">
         <span className="wordmark">Print to Frame</span>
       </header>
@@ -170,7 +174,11 @@ export default function App() {
       ) : (
         <main className="workspace">
           <section className="editor" aria-label="Crop">
-            <CropEditor item={item} onCrop={(crop) => item.shape !== 'whole' && dispatch({ type: 'setCrop', id: item.id, shape: item.shape, crop })} />
+            <CropEditor
+              item={item}
+              onCrop={(crop) => item.shape !== 'whole' && dispatch({ type: 'setCrop', id: item.id, shape: item.shape, crop })}
+              {...frameCropProps(flags)}
+            />
             <div className="editor-footer">
               {item.shape !== 'whole' && (
                 <AdjustPad
@@ -269,6 +277,8 @@ export default function App() {
           </aside>
         </main>
       )}
+
+      {DEV_MODE && <DevPanel flags={flags} onChange={setFlags} />}
     </div>
   )
 }
