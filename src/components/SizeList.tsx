@@ -24,14 +24,14 @@ export function SizeList({ shape, paper, sizeId, onChange }: SizeListProps) {
         const tall = shape === 'tall'
         const piece = { key: id, width: tall ? size.short : size.long, height: tall ? size.long : size.short }
         const [page] = layoutSheets(Array.from({ length: id === 'full' ? 1 : FILL }, () => piece), paper)
-        return { size, placements: page.placements }
+        return { size, page }
       }),
     [shape, paper],
   )
 
   return (
     <div className="size-list" role="radiogroup" aria-label="Size">
-      {sheets.map(({ size, placements }) => (
+      {sheets.map(({ size, page }) => (
         <button
           key={size.id}
           type="button"
@@ -40,25 +40,30 @@ export function SizeList({ shape, paper, sizeId, onChange }: SizeListProps) {
           className="size-option"
           onClick={() => onChange(size.id)}
         >
-          <span className="size-sheet" style={{ aspectRatio: `${paper.width} / ${paper.height}` }} aria-hidden="true">
-            {placements.map((p, index) => (
-              <img
-                key={index}
-                src={samplePhoto}
-                alt=""
-                draggable={false}
-                style={{
-                  left: `${(p.x / paper.width) * 100}%`,
-                  top: `${(p.y / paper.height) * 100}%`,
-                  width: `${(p.width / paper.width) * 100}%`,
-                  height: `${(p.height / paper.height) * 100}%`,
-                }}
-              />
-            ))}
+          <span className="size-sheet-area" aria-hidden="true">
+            <span
+              className={`size-sheet${page.landscape ? ' is-landscape' : ''}`}
+              style={{ aspectRatio: `${page.width} / ${page.height}` }}
+            >
+              {page.placements.map((p, index) => (
+                <img
+                  key={index}
+                  src={samplePhoto}
+                  alt=""
+                  draggable={false}
+                  style={{
+                    left: `${(p.x / page.width) * 100}%`,
+                    top: `${(p.y / page.height) * 100}%`,
+                    width: `${(p.width / page.width) * 100}%`,
+                    height: `${(p.height / page.height) * 100}%`,
+                  }}
+                />
+              ))}
+            </span>
           </span>
           <span className="size-label">
             {size.label}
-            {size.id !== 'full' && ` (${placements.length})`}
+            {size.id !== 'full' && ` (${page.placements.length})`}
           </span>
         </button>
       ))}

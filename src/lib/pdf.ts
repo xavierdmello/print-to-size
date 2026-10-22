@@ -9,9 +9,9 @@ const CUT_LINE = { color: rgb(0.55, 0.55, 0.55), width: 0.5, dash: [3, 2.5] }
  * Arguments for pdf-lib's drawImage that put an image, rendered upright at the
  * piece's printed size, into `placement`. PDF coordinates start at the bottom left.
  */
-export function imageDrawArgs(placement: Placement, paper: Dimensions) {
+export function imageDrawArgs(placement: Placement, page: Dimensions) {
   const x = placement.x * POINTS_PER_INCH
-  const y = (paper.height - placement.y - placement.height) * POINTS_PER_INCH
+  const y = (page.height - placement.y - placement.height) * POINTS_PER_INCH
   const width = placement.width * POINTS_PER_INCH
   const height = placement.height * POINTS_PER_INCH
   if (!placement.rotated) return { x, y, width, height, rotate: degrees(0) }
@@ -19,12 +19,8 @@ export function imageDrawArgs(placement: Placement, paper: Dimensions) {
   return { x: x + width, y, width: height, height: width, rotate: degrees(90) }
 }
 
-/** One PDF page per sheet. `images` maps each placement key to its JPEG. */
-export async function buildPdf(
-  pages: readonly SheetPage[],
-  paper: Dimensions,
-  images: ReadonlyMap<string, Uint8Array>,
-): Promise<Uint8Array> {
+/** One PDF page per sheet, portrait or landscape as laid out. `images` maps each placement key to its JPEG. */
+export async function buildPdf(pages: readonly SheetPage[], images: ReadonlyMap<string, Uint8Array>): Promise<Uint8Array> {
   const pdf = await PDFDocument.create()
   pdf.setTitle('Photos to print')
   pdf.setCreator('Print to Size')
@@ -33,14 +29,14 @@ export async function buildPdf(
   for (const [key, jpeg] of images) embedded.set(key, await pdf.embedJpg(jpeg))
 
   for (const sheet of pages) {
-    const page = pdf.addPage([paper.width * POINTS_PER_INCH, paper.height * POINTS_PER_INCH])
+    const page = pdf.addPage([sheet.width * POINTS_PER_INCH, sheet.height * POINTS_PER_INCH])
     for (const placement of sheet.placements) {
       const image = embedded.get(placement.key)
       if (!image) throw new Error(`No image for ${placement.key}`)
-      page.drawImage(image, imageDrawArgs(placement, paper))
+      page.drawImage(image, imageDrawArgs(placement, sheet))
       page.drawRectangle({
         x: placement.x * POINTS_PER_INCH,
-        y: (paper.height - placement.y - placement.height) * POINTS_PER_INCH,
+        y: (sheet.height - placement.y - placement.height) * POINTS_PER_INCH,
         width: placement.width * POINTS_PER_INCH,
         height: placement.height * POINTS_PER_INCH,
         borderColor: CUT_LINE.color,

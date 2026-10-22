@@ -27,11 +27,12 @@ interface PageEditorProps {
   empty?: ReactNode
 }
 
-const PAGE_MARGIN = 28
+/** Screen space kept around the page in the preview. */
+const ROOM = 28
 
-function fitPage(area: Dimensions, paper: Paper): Dimensions {
-  const width = Math.min(area.width - PAGE_MARGIN * 2, ((area.height - PAGE_MARGIN * 2) * paper.width) / paper.height)
-  return { width: Math.max(0, width), height: Math.max(0, (width * paper.height) / paper.width) }
+function fitPage(area: Dimensions, sheet: Dimensions): Dimensions {
+  const width = Math.min(area.width - ROOM * 2, ((area.height - ROOM * 2) * sheet.width) / sheet.height)
+  return { width: Math.max(0, width), height: Math.max(0, (width * sheet.height) / sheet.width) }
 }
 
 /** A rotated piece is drawn upright, then turned a quarter anticlockwise, as in the PDF. */
@@ -58,9 +59,6 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
 
   const selected = items.find((item) => item.id === selectedId) ?? null
   const byId = new Map(items.map((item) => [item.id, item]))
-  const page = area ? fitPage(area, paper) : null
-  const pxPerInch = page ? page.width / paper.width : 0
-
   const selectedPage = pages.findIndex((p) => p.placements.some((placement) => placement.key === selectedId))
   const pageIndex = Math.min(
     paged?.selectedId === selectedId ? paged.index : Math.max(0, selectedPage),
@@ -68,6 +66,11 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
   )
   const current = pages[pageIndex]
   const showPage = (index: number) => setPaged({ selectedId, index })
+
+  // A blank page shows the paper upright; a laid-out page shows the way it was turned.
+  const sheet: Dimensions = current ?? paper
+  const page = area ? fitPage(area, sheet) : null
+  const pxPerInch = page ? page.width / sheet.width : 0
 
   const editable = selected !== null && selected.shape !== 'whole'
   const selectedPlacement = current?.placements.find((placement) => placement.key === selectedId)

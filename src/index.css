@@ -464,12 +464,25 @@ select {
   background: var(--selected);
 }
 
+.size-sheet-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+}
+
 .size-sheet {
   position: relative;
   display: block;
   height: 96px;
   background: var(--paper);
   box-shadow: 0 0 0 1px var(--paper-edge), 0 1px 3px rgb(0 0 0 / 0.15);
+}
+
+.size-sheet.is-landscape {
+  width: 96px;
+  height: auto;
 }
 
 .size-sheet img {
@@ -514,8 +527,17 @@ select {
     flex: none;
   }
 
+  .size-sheet-area {
+    width: 88px;
+    height: 88px;
+  }
+
   .size-sheet {
     height: 84px;
+  }
+
+  .size-sheet.is-landscape {
+    width: 84px;
   }
 
   .toolbar-end {

@@ -15,7 +15,7 @@ export async function makeSheetPdf(items: readonly PrintItem[], paperId: PaperId
       await renderPrint(item.photo.bitmap, item.photo, getSize(item.sizeId, paper), item.shape, itemCrop(item)),
     )
   }
-  return buildPdf(pages, paper, images)
+  return buildPdf(pages, images)
 }
 
 export function pdfFilename(items: readonly PrintItem[]): string {

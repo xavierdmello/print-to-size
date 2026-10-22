@@ -1,5 +1,5 @@
 import type { Dimensions } from './crop'
-import { MIN_PAGE_MARGIN } from './layout'
+import { PAGE_MARGIN } from './layout'
 
 export type SizeId = 'full' | '4x6' | '5x7' | '8x10' | '3.5x5' | 'wallet'
 
@@ -31,8 +31,8 @@ export function getSize(id: SizeId, paper: Dimensions): PrintSize {
     return {
       id,
       label: 'Full page photo',
-      short: paper.width - 2 * MIN_PAGE_MARGIN.x,
-      long: paper.height - 2 * MIN_PAGE_MARGIN.y,
+      short: paper.width - 2 * PAGE_MARGIN,
+      long: paper.height - 2 * PAGE_MARGIN,
     }
   }
   return { id, ...FIXED[id] }

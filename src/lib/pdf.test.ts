@@ -15,39 +15,40 @@ const JPEG = Uint8Array.from(
 )
 
 describe('imageDrawArgs', () => {
-  it('converts a placement to PDF points from the bottom-left corner', () => {
+  it('converts a placement to PDF points from the page\'s bottom-left corner', () => {
     const [page] = layoutSheets([{ key: 'a', width: 6, height: 4 }], letter)
-    const args = imageDrawArgs(page.placements[0], letter)
-    expect(args).toMatchObject({ x: 90, y: 252, width: 432, height: 288 })
+    const args = imageDrawArgs(page.placements[0], page)
+    expect(args).toMatchObject({ x: 180, y: 162, width: 432, height: 288 })
     expect(args.rotate.angle).toBe(0)
   })
 
-  it('draws a rotated photo so it covers the same rectangle', () => {
-    const [page] = layoutSheets([{ key: 'a', width: 10, height: 8 }], letter)
-    const placement = page.placements[0]
-    const args = imageDrawArgs(placement, letter)
+  it('draws a turned photo so it covers the same rectangle', () => {
+    const page = { width: 8.5, height: 11 }
+    const placement = { key: 'a', x: 0.25, y: 0.5, width: 8, height: 10, rotated: true }
+    const args = imageDrawArgs(placement, page)
     expect(args.rotate.angle).toBe(90)
     expect(args).toMatchObject({ width: 720, height: 576 })
     // After a 90° turn the image spans [x - height, x] horizontally and [y, y + width] vertically.
     expect(args.x - args.height).toBeCloseTo(placement.x * 72)
-    expect(args.y + args.width).toBeCloseTo((letter.height - placement.y) * 72)
+    expect(args.y + args.width).toBeCloseTo((page.height - placement.y) * 72)
   })
 })
 
 describe('buildPdf', () => {
-  it('makes one page per sheet at the paper size', async () => {
+  it('makes one page per sheet, each the way it was turned', async () => {
     const pages = layoutSheets(
       [1, 2, 3].map((n) => ({ key: `p${n}`, width: 6, height: 4 })),
       letter,
     )
     const images = new Map(pages.flatMap((p) => p.placements).map((p) => [p.key, JPEG]))
-    const pdf = await PDFDocument.load(await buildPdf(pages, letter, images))
+    const pdf = await PDFDocument.load(await buildPdf(pages, images))
     expect(pdf.getPageCount()).toBe(2)
     expect(pdf.getPage(0).getSize()).toEqual({ width: 612, height: 792 })
+    expect(pdf.getPage(1).getSize()).toEqual({ width: 792, height: 612 })
   })
 
   it('fails loudly when an image is missing', async () => {
     const pages = layoutSheets([{ key: 'a', width: 6, height: 4 }], letter)
-    await expect(buildPdf(pages, letter, new Map())).rejects.toThrow('No image for a')
+    await expect(buildPdf(pages, new Map())).rejects.toThrow('No image for a')
   })
 })
