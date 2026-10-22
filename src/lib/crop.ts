@@ -91,12 +91,3 @@ export function fitRect(image: Dimensions, box: Dimensions): Rect {
   const height = image.height * scale
   return { x: (box.width - width) / 2, y: (box.height - height) / 2, width, height }
 }
-
-/** Photo pixels per printed inch. */
-export function effectiveDpi(image: Dimensions, size: PrintSize, shape: Shape, crop: Crop): number {
-  const print = printDimensions(size, shape, image)
-  if (shape === 'whole') {
-    return Math.min(image.width / print.width, image.height / print.height)
-  }
-  return cropRect(image, print.width / print.height, crop).width / print.width
-}

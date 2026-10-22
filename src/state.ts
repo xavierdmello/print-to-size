@@ -33,6 +33,7 @@ export type Action =
   | { type: 'setCrop'; id: string; shape: CropShape; crop: Crop }
   | { type: 'setCopies'; id: string; copies: number }
   | { type: 'setPaper'; paperId: PaperId }
+  | { type: 'setDefaultSize'; sizeId: SizeId }
 
 function update(state: AppState, id: string, change: (item: PrintItem) => PrintItem): AppState {
   return { ...state, items: state.items.map((item) => (item.id === id ? change(item) : item)) }
@@ -73,6 +74,8 @@ export function reducer(state: AppState, action: Action): AppState {
       }))
     case 'setPaper':
       return { ...state, paperId: action.paperId }
+    case 'setDefaultSize':
+      return { ...state, sizeId: action.sizeId }
   }
 }
 

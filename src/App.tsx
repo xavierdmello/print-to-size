@@ -1,28 +1,23 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { AdjustPad } from './components/AdjustPad'
-import { CropEditor } from './components/CropEditor'
-import { AlertIcon, MinusIcon, PhotoIcon, PlusIcon, PrinterIcon, TrashIcon } from './components/icons'
-import { ShapeChoices } from './components/ShapeChoices'
-import { SheetPreview } from './components/SheetPreview'
-import { SizeChoices } from './components/SizeChoices'
+import { MinusIcon, PlusIcon } from './components/icons'
+import { PageEditor } from './components/PageEditor'
+import { ShapePicker } from './components/ShapePicker'
+import { SizeList } from './components/SizeList'
 import { DevPanel } from './experiments/DevPanel'
 import { DEV_MODE, useDevFlags } from './experiments/flags'
-import { frameCropProps } from './experiments/frameCrop'
+import { CropEditor } from './experiments/frameCrop/CropEditor'
+import { frameCropProps } from './experiments/frameCrop/frameCrop'
 import { RealSizeButton } from './experiments/RealSize'
 import { useSmartCrop } from './experiments/smartCrop/useSmartCrop'
-import { effectiveDpi } from './lib/crop'
+import type { Crop } from './lib/crop'
 import { layoutSheets } from './lib/layout'
 import { PAPERS, defaultPaperFor, getPaper, isPaperId } from './lib/paper'
 import { loadPhoto, looksLikePhoto, releasePhoto } from './lib/photo'
 import { preparePrintWindow, printPdf, savePdf } from './lib/print'
-import { DEFAULT_SIZE, getSize, isSizeId } from './lib/sizes'
+import { DEFAULT_SIZE, isSizeId, type SizeId } from './lib/sizes'
 import { readSetting, writeSetting } from './lib/storage'
-import { makeSheetPdf, pdfFilename } from './printSheet'
-import { MAX_COPIES, itemCrop, reducer, sheetPieces, type AppState } from './state'
-
-/** Below this many photo pixels per inch a print starts to look soft. */
-const SOFT_DPI = 150
-const BLURRY_DPI = 100
+import { MAX_COPIES, reducer, sheetPieces, type AppState, type PrintItem } from './state'
 
 function initialState(): AppState {
   const paper = readSetting('paper')
@@ -41,21 +36,12 @@ export default function App() {
   const smartCropStatus = useSmartCrop(state.items, flags.smartCrop, dispatch)
   const [busy, setBusy] = useState<'print' | 'save' | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [dragging, setDragging] = useState(false)
+  const [dropping, setDropping] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
-  const panel = useRef<HTMLElement>(null)
 
   const item = state.items.find((candidate) => candidate.id === state.selectedId) ?? null
   const paper = getPaper(state.paperId)
   const pages = useMemo(() => layoutSheets(sheetPieces(state.items), paper), [state.items, paper])
-
-  // A newly added photo is selected; bring its size and shape controls back into view.
-  const itemCount = state.items.length
-  const previousCount = useRef(itemCount)
-  useEffect(() => {
-    if (itemCount > previousCount.current) panel.current?.scrollTo({ top: 0 })
-    previousCount.current = itemCount
-  }, [itemCount])
 
   useEffect(() => writeSetting('paper', state.paperId), [state.paperId])
   useEffect(() => writeSetting('size', state.sizeId), [state.sizeId])
@@ -80,15 +66,15 @@ export default function App() {
     const onDragOver = (event: DragEvent) => {
       if (!hasFiles(event)) return
       event.preventDefault()
-      setDragging(true)
+      setDropping(true)
     }
     const onDragLeave = (event: DragEvent) => {
-      if (event.relatedTarget === null) setDragging(false)
+      if (event.relatedTarget === null) setDropping(false)
     }
     const onDrop = (event: DragEvent) => {
       if (!hasFiles(event)) return
       event.preventDefault()
-      setDragging(false)
+      setDropping(false)
       void addFiles(event.dataTransfer?.files ?? [])
     }
     const onPaste = (event: ClipboardEvent) => {
@@ -107,10 +93,17 @@ export default function App() {
     }
   }, [addFiles])
 
-  function removeItem(id: string) {
-    const removed = state.items.find((candidate) => candidate.id === id)
-    dispatch({ type: 'remove', id })
-    if (removed) releasePhoto(removed.photo)
+  function setCrop(target: PrintItem, crop: Crop) {
+    if (target.shape !== 'whole') dispatch({ type: 'setCrop', id: target.id, shape: target.shape, crop })
+  }
+
+  function setSize(sizeId: SizeId) {
+    dispatch(item ? { type: 'setSize', id: item.id, sizeId } : { type: 'setDefaultSize', sizeId })
+  }
+
+  function removeItem(target: PrintItem) {
+    dispatch({ type: 'remove', id: target.id })
+    releasePhoto(target.photo)
   }
 
   async function output(kind: 'print' | 'save') {
@@ -118,6 +111,8 @@ export default function App() {
     setBusy(kind)
     setError(null)
     try {
+      // The PDF code is only needed once someone prints, so it loads then.
+      const { makeSheetPdf, pdfFilename } = await import('./printSheet')
       const pdf = await makeSheetPdf(state.items, state.paperId)
       if (kind === 'print') printPdf(pdf, printWindow)
       else savePdf(pdf, pdfFilename(state.items))
@@ -129,19 +124,45 @@ export default function App() {
     }
   }
 
-  const dpi = item ? effectiveDpi(item.photo, getSize(item.sizeId), item.shape, itemCrop(item)) : Infinity
-  const quality =
-    dpi < BLURRY_DPI
-      ? 'This photo will look blurry at this size.'
-      : dpi < SOFT_DPI
-        ? 'This photo may look a little soft at this size.'
-        : null
+  const chooseFiles = () => fileInput.current?.click()
+  const nothingToPrint = state.items.length === 0 || busy !== null
 
   return (
-    <div className={`app${dragging ? ' is-drop-target' : ''}`}>
-      <header className="topbar">
-        <span className="wordmark">Print to Frame</span>
+    <div className={`dialog${dropping ? ' is-drop-target' : ''}`}>
+      <header className="dialog-header">
+        <h1>Print to Frame</h1>
       </header>
+
+      <div className="toolbar">
+        <label className="field">
+          <span>Paper size:</span>
+          <select
+            id="paper"
+            className="select"
+            value={state.paperId}
+            onChange={(event) => {
+              const paperId = event.currentTarget.value
+              if (isPaperId(paperId)) dispatch({ type: 'setPaper', paperId })
+            }}
+          >
+            {PAPERS.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="field">
+          <span id="shape-label">Shape:</span>
+          <ShapePicker
+            shape={item?.shape ?? null}
+            onChange={(shape) => item && dispatch({ type: 'setShape', id: item.id, shape })}
+          />
+        </div>
+        <button type="button" className="button toolbar-end" onClick={chooseFiles}>
+          Add photos…
+        </button>
+      </div>
 
       <input
         ref={fileInput}
@@ -156,131 +177,81 @@ export default function App() {
       />
 
       {error && (
-        <p className="notice is-error" role="alert">
-          <AlertIcon />
+        <p className="info-bar" role="alert">
           {error}
         </p>
       )}
 
-      {!item ? (
-        <main className="empty">
-          <div className="empty-card">
-            <span className="empty-icon">
-              <PhotoIcon />
-            </span>
-            <button type="button" className="primary-button" onClick={() => fileInput.current?.click()}>
-              Choose a photo
-            </button>
-            <p className="empty-hint">or drop one here</p>
-          </div>
-        </main>
-      ) : (
-        <main className="workspace">
-          <section className="editor" aria-label="Crop">
-            <CropEditor
-              item={item}
-              onCrop={(crop) => item.shape !== 'whole' && dispatch({ type: 'setCrop', id: item.id, shape: item.shape, crop })}
-              {...frameCropProps(flags)}
+      <div className="dialog-body">
+        <section className="preview" aria-label="Preview">
+          {flags.frameCrop && item ? (
+            <CropEditor item={item} onCrop={(crop) => setCrop(item, crop)} {...frameCropProps(flags)} />
+          ) : (
+            <PageEditor
+              pages={pages}
+              paper={paper}
+              items={state.items}
+              selectedId={state.selectedId}
+              onSelect={(id) => dispatch({ type: 'select', id })}
+              onCrop={setCrop}
+              empty={
+                <div className="page-empty">
+                  <button type="button" className="button default large" onClick={chooseFiles}>
+                    Choose photos…
+                  </button>
+                  <span className="drop-hint">or drop them here</span>
+                </div>
+              }
             />
-            <div className="editor-footer">
-              {item.shape !== 'whole' && (
-                <AdjustPad
-                  item={item}
-                  onCrop={(crop) => item.shape !== 'whole' && dispatch({ type: 'setCrop', id: item.id, shape: item.shape, crop })}
-                />
-              )}
-              {flags.realSize && <RealSizeButton item={item} framed={frameCropProps(flags).className} />}
-              {quality && (
-                <p className="notice">
-                  <AlertIcon />
-                  {quality}
-                </p>
-              )}
-            </div>
-          </section>
+          )}
+        </section>
+        <SizeList item={item} sizeId={item?.sizeId ?? state.sizeId} onChange={setSize} />
+      </div>
 
-          <aside className="panel" ref={panel}>
-            <section className="panel-section">
-              <h2>Size</h2>
-              <SizeChoices item={item} onChange={(sizeId) => dispatch({ type: 'setSize', id: item.id, sizeId })} />
-            </section>
+      <div className="options-bar">
+        <div className="field">
+          <span id="copies-label">Copies of this photo:</span>
+          <div className="stepper" role="group" aria-labelledby="copies-label">
+            <button
+              type="button"
+              className="button icon"
+              aria-label="One fewer copy"
+              disabled={!item || item.copies <= 1}
+              onClick={() => item && dispatch({ type: 'setCopies', id: item.id, copies: item.copies - 1 })}
+            >
+              <MinusIcon />
+            </button>
+            <output aria-live="polite">{item?.copies ?? 1}</output>
+            <button
+              type="button"
+              className="button icon"
+              aria-label="One more copy"
+              disabled={!item || item.copies >= MAX_COPIES}
+              onClick={() => item && dispatch({ type: 'setCopies', id: item.id, copies: item.copies + 1 })}
+            >
+              <PlusIcon />
+            </button>
+          </div>
+        </div>
+        <AdjustPad item={item} onCrop={(crop) => item && setCrop(item, crop)} />
+        <div className="options-end">
+          {flags.realSize && item && <RealSizeButton item={item} framed={frameCropProps(flags).className} />}
+          {item && (
+            <button type="button" className="link-button" onClick={() => removeItem(item)}>
+              Remove photo
+            </button>
+          )}
+        </div>
+      </div>
 
-            <section className="panel-section">
-              <h2>Shape</h2>
-              <ShapeChoices item={item} onChange={(shape) => dispatch({ type: 'setShape', id: item.id, shape })} />
-            </section>
-
-            <section className="panel-section">
-              <div className="section-head">
-                <h2>Paper</h2>
-                <div className="segmented" role="radiogroup" aria-label="Paper">
-                  {PAPERS.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={state.paperId === option.id}
-                      onClick={() => dispatch({ type: 'setPaper', paperId: option.id })}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <SheetPreview
-                pages={pages}
-                paper={paper}
-                items={state.items}
-                selectedId={state.selectedId}
-                onSelect={(id) => dispatch({ type: 'select', id })}
-              />
-              <div className="item-tools">
-                <div className="stepper" role="group" aria-label="Copies">
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label="One fewer copy"
-                    disabled={item.copies <= 1}
-                    onClick={() => dispatch({ type: 'setCopies', id: item.id, copies: item.copies - 1 })}
-                  >
-                    <MinusIcon />
-                  </button>
-                  <output aria-live="polite">
-                    {item.copies} {item.copies === 1 ? 'copy' : 'copies'}
-                  </output>
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label="One more copy"
-                    disabled={item.copies >= MAX_COPIES}
-                    onClick={() => dispatch({ type: 'setCopies', id: item.id, copies: item.copies + 1 })}
-                  >
-                    <PlusIcon />
-                  </button>
-                </div>
-                <button type="button" className="text-button" onClick={() => removeItem(item.id)}>
-                  <TrashIcon />
-                  Remove
-                </button>
-              </div>
-              <button type="button" className="secondary-button" onClick={() => fileInput.current?.click()}>
-                <PlusIcon />
-                Add another photo
-              </button>
-            </section>
-
-            <div className="actions">
-              <button type="button" className="primary-button" disabled={busy !== null} onClick={() => void output('print')}>
-                <PrinterIcon />
-                {busy === 'print' ? 'Preparing…' : 'Print'}
-              </button>
-              <button type="button" className="text-button" disabled={busy !== null} onClick={() => void output('save')}>
-                {busy === 'save' ? 'Preparing…' : 'Save as PDF'}
-              </button>
-            </div>
-          </aside>
-        </main>
-      )}
+      <footer className="dialog-footer">
+        <button type="button" className="button" disabled={nothingToPrint} onClick={() => void output('save')}>
+          {busy === 'save' ? 'Preparing…' : 'Save as PDF'}
+        </button>
+        <button type="button" className="button default" disabled={nothingToPrint} onClick={() => void output('print')}>
+          {busy === 'print' ? 'Preparing…' : 'Print'}
+        </button>
+      </footer>
 
       {DEV_MODE && <DevPanel flags={flags} onChange={setFlags} smartCropStatus={smartCropStatus} />}
     </div>

@@ -3,7 +3,6 @@ import {
   CENTERED,
   MAX_ZOOM,
   cropRect,
-  effectiveDpi,
   fitRect,
   panCrop,
   printDimensions,
@@ -74,16 +73,5 @@ describe('zoomCrop', () => {
 describe('fitRect', () => {
   it('centres the whole photo inside the box', () => {
     expect(fitRect(tallPhone, { width: 4, height: 6 })).toEqual({ x: 0.5, y: 0, width: 3, height: 6 })
-  })
-})
-
-describe('effectiveDpi', () => {
-  it('measures pixels per printed inch of the crop', () => {
-    expect(effectiveDpi(iphone, fourBySix, 'wide', CENTERED)).toBe(672)
-    expect(effectiveDpi({ width: 1152, height: 768 }, fourBySix, 'wide', CENTERED)).toBe(192)
-  })
-
-  it('uses the fitted size for a whole photo', () => {
-    expect(effectiveDpi(tallPhone, fourBySix, 'whole', CENTERED)).toBe(270)
   })
 })

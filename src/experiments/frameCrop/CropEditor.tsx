@@ -1,9 +1,16 @@
+/**
+ * EXPERIMENT: throwaway UI test behind a dev-only switch (see README, "Experiments").
+ * Not a pattern to build on. Delete it, or rebuild the winning idea properly in the core app.
+ *
+ * A separate crop stage: the photo in a window on its own backdrop, which the frame
+ * experiment dresses up as a framed picture on a wall.
+ */
 import { useEffect, useEffectEvent, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
-import { CENTERED, cropRect, panCrop, zoomCrop, type Crop, type Dimensions } from '../lib/crop'
-import { itemCrop, itemDimensions, type PrintItem } from '../state'
-import { PhotoCrop } from './PhotoCrop'
-import { NUDGE, ZOOM_STEP, photoPlacement } from './placement'
-import { useElementSize } from './useElementSize'
+import { CENTERED, cropRect, panCrop, zoomCrop, type Crop, type Dimensions } from '../../lib/crop'
+import { itemCrop, itemDimensions, type PrintItem } from '../../state'
+import { PhotoCrop } from '../../components/PhotoCrop'
+import { NUDGE, ZOOM_STEP, photoPlacement } from '../../components/placement'
+import { useElementSize } from '../../components/useElementSize'
 
 interface CropEditorProps {
   item: PrintItem

@@ -33,11 +33,50 @@
 
 .dev-panel select {
   font: inherit;
+  color: #111;
+  background: #fff;
 }
 
 .dev-panel small {
   max-width: 180px;
   color: #a4abb5;
+}
+
+/* The separate crop stage the frame experiment uses in place of the page preview. */
+
+.crop-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.crop-stage.is-editable {
+  cursor: grab;
+}
+
+.crop-stage.is-editable:active {
+  cursor: grabbing;
+}
+
+.crop-window {
+  position: relative;
+}
+
+.crop-photo {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
+}
+
+.crop-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
 /* Frame crop: the stage becomes a wall and the crop window a framed picture hanging on it. */
@@ -118,7 +157,8 @@
   top: 0;
   display: flex;
   justify-content: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: 16px;
   padding-block: 12px;
   padding-left: var(--gutter-left);
   padding-right: var(--gutter-right);

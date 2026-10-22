@@ -58,11 +58,11 @@ export function RealSizeView({ item, framed, onClose }: RealSizeProps) {
     <div className="real-size" role="dialog" aria-modal="true" aria-label="Real size">
       <div className="real-size-bar">
         {!calibrating && (
-          <button type="button" className="text-button" onClick={() => setCalibrating(true)}>
+          <button type="button" className="link-button" onClick={() => setCalibrating(true)}>
             Adjust scale
           </button>
         )}
-        <button type="button" className="secondary-button" onClick={onClose}>
+        <button type="button" className="button" onClick={onClose}>
           Close
         </button>
       </div>
@@ -84,7 +84,7 @@ export function RealSizeView({ item, framed, onClose }: RealSizeProps) {
             aria-label="Card outline size"
             onChange={(event) => setPxPerInch(Number(event.currentTarget.value))}
           />
-          <button type="button" className="primary-button" onClick={finishCalibration}>
+          <button type="button" className="button default large" onClick={finishCalibration}>
             Done
           </button>
         </div>
@@ -114,7 +114,7 @@ export function RealSizeButton({ item, framed }: Omit<RealSizeProps, 'onClose'>)
   const [open, setOpen] = useState(false)
   return (
     <>
-      <button type="button" className="text-button" onClick={() => setOpen(true)}>
+      <button type="button" className="button" onClick={() => setOpen(true)}>
         See real size
       </button>
       {open && <RealSizeView item={item} framed={framed} onClose={() => setOpen(false)} />}
