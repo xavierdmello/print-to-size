@@ -27,7 +27,7 @@ export async function buildPdf(
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.create()
   pdf.setTitle('Photos to print')
-  pdf.setCreator('Print to Frame')
+  pdf.setCreator('Print to Size')
 
   const embedded = new Map<string, Awaited<ReturnType<typeof pdf.embedJpg>>>()
   for (const [key, jpeg] of images) embedded.set(key, await pdf.embedJpg(jpeg))

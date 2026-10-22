@@ -1,4 +1,4 @@
-const PREFIX = 'print-to-frame:'
+const PREFIX = 'print-to-size:'
 
 export function readSetting(key: string): string | null {
   try {

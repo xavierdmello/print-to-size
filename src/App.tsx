@@ -132,7 +132,7 @@ export default function App() {
   return (
     <div className={`dialog${dropping ? ' is-drop-target' : ''}`}>
       <header className="dialog-header">
-        <h1>Print to Frame</h1>
+        <h1>Print to Size</h1>
       </header>
 
       <div className="toolbar">

@@ -1,4 +1,4 @@
-# Print to Frame
+# Print to Size
 
 Print a photo at the exact size of a picture frame on ordinary paper.
 
