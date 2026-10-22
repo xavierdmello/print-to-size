@@ -21,8 +21,8 @@ export const PAGE_MARGIN = { x: 0.25, y: 0.25 }
  * Used only for a photo that won't fit inside the comfortable margin, such as a full page photo.
  */
 export const MIN_PAGE_MARGIN = { x: 0.12, y: 0.2 }
-/** Space between photos, so each can be cut out cleanly. */
-export const PIECE_GAP = 0.25
+/** Rounding slack, so a layout that fits exactly (three wallets across 7.5 in) isn't rejected. */
+const EPSILON = 1e-9
 
 interface Shelf {
   y: number
@@ -30,16 +30,12 @@ interface Shelf {
   right: number
 }
 
-interface Orientation extends Dimensions {
-  rotated: boolean
+function oriented(piece: Piece, turned: boolean): Dimensions {
+  return turned ? { width: piece.height, height: piece.width } : { width: piece.width, height: piece.height }
 }
 
-function orientations(piece: Piece, area: Dimensions, preferRotated: boolean): Orientation[] {
-  const upright = { width: piece.width, height: piece.height, rotated: false }
-  const turned = { width: piece.height, height: piece.width, rotated: true }
-  return (preferRotated ? [turned, upright] : [upright, turned]).filter(
-    (o) => o.width <= area.width + 1e-9 && o.height <= area.height + 1e-9,
-  )
+function fitsIn(size: Dimensions, area: Dimensions): boolean {
+  return size.width <= area.width + EPSILON && size.height <= area.height + EPSILON
 }
 
 function printableArea(paper: Dimensions, margin: { x: number; y: number }): Dimensions {
@@ -47,17 +43,17 @@ function printableArea(paper: Dimensions, margin: { x: number; y: number }): Dim
 }
 
 /**
- * Arranges pieces on as few portrait pages as a simple shelf packing allows,
- * keeping their order. Each page is packed both upright-first and turned-first,
- * and whichever fits more photos wins, so photos are only turned when that saves
- * paper. A page only goes out to the printer's minimum margin when its first photo
- * won't fit otherwise. Each page's arrangement is centred on the paper.
+ * Lays pieces out the way the Windows 7 Print Pictures dialog does: edge to edge in
+ * rows, every photo on a page facing the same way, as few pages as possible, in order.
+ * A page is turned sideways only when that fits more photos (two 5×7s on Letter), and
+ * only goes out to the printer's minimum margin when its first photo needs it. Each
+ * page's arrangement is centred on the paper.
  */
 export function layoutSheets(pieces: readonly Piece[], paper: Dimensions): SheetPage[] {
   const comfortable = printableArea(paper, PAGE_MARGIN)
   const minimum = printableArea(paper, MIN_PAGE_MARGIN)
   for (const piece of pieces) {
-    if (orientations(piece, minimum, false).length === 0) {
+    if (!fitsIn(piece, minimum) && !fitsIn(oriented(piece, true), minimum)) {
       throw new Error(`A ${piece.width}×${piece.height} in photo does not fit on the paper`)
     }
   }
@@ -79,38 +75,34 @@ function bestPage(pieces: readonly Piece[], start: number, area: Dimensions): Pl
   return turned.length > upright.length ? turned : upright
 }
 
-/** Fills one page with pieces from `start` onwards, stopping at the first that doesn't fit. */
-function packPage(pieces: readonly Piece[], start: number, area: Dimensions, preferRotated: boolean): Placement[] {
+/** Fills one page with pieces from `start` onwards, all facing one way, stopping at the first that doesn't fit. */
+function packPage(pieces: readonly Piece[], start: number, area: Dimensions, turned: boolean): Placement[] {
   const shelves: Shelf[] = []
   const placements: Placement[] = []
   for (let i = start; i < pieces.length; i++) {
-    const placement = place(shelves, pieces[i], orientations(pieces[i], area, preferRotated), area)
+    const placement = place(shelves, pieces[i], oriented(pieces[i], turned), turned, area)
     if (!placement) break
     placements.push(placement)
   }
   return placements
 }
 
-function place(shelves: Shelf[], piece: Piece, options: Orientation[], area: Dimensions): Placement | null {
+function place(shelves: Shelf[], piece: Piece, size: Dimensions, rotated: boolean, area: Dimensions): Placement | null {
   const last = shelves.at(-1)
 
   // Beside the last photo on the current row.
-  if (last) {
-    const x = last.right + PIECE_GAP
-    const fit = options.find((o) => x + o.width <= area.width && last.y + o.height <= area.height)
-    if (fit) {
-      last.right = x + fit.width
-      last.height = Math.max(last.height, fit.height)
-      return { key: piece.key, x, y: last.y, width: fit.width, height: fit.height, rotated: fit.rotated }
-    }
+  if (last && last.right + size.width <= area.width + EPSILON && last.y + size.height <= area.height + EPSILON) {
+    const x = last.right
+    last.right += size.width
+    last.height = Math.max(last.height, size.height)
+    return { key: piece.key, x, y: last.y, ...size, rotated }
   }
 
   // On a new row.
-  const y = last ? last.y + last.height + PIECE_GAP : 0
-  const fit = options.find((o) => y + o.height <= area.height)
-  if (!fit) return null
-  shelves.push({ y, height: fit.height, right: fit.width })
-  return { key: piece.key, x: 0, y, width: fit.width, height: fit.height, rotated: fit.rotated }
+  const y = last ? last.y + last.height : 0
+  if (!fitsIn({ width: size.width, height: y + size.height }, area)) return null
+  shelves.push({ y, height: size.height, right: size.width })
+  return { key: piece.key, x: 0, y, ...size, rotated }
 }
 
 function centre(placements: Placement[], paper: Dimensions): Placement[] {

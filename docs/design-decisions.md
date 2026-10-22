@@ -2,6 +2,12 @@
 
 Choices about the interface that were questioned and settled, with the reasoning, so they aren't undone by accident. Add new entries at the end.
 
+## Ground rule: the Windows 7 Print Pictures dialog is the reference
+
+When in doubt, do what Windows 7 did: its look, its layouts, and how many of each size fit on a sheet (Full page 1, 4×6 2, 5×7 2, 8×10 1, 3½×5 4, Wallet 9). Only depart from it where it was weak, such as letting you choose the crop, or where the owner has decided to. A rule of our own that makes the app behave differently from Windows 7 needs that decision first; don't add one on our own judgement.
+
+This replaces an earlier rule of ours, now removed, that left a ¼ in gap between photos for cutting and squeezed extra photos onto a page by turning some of them. It gave counts Windows 7 doesn't (three 4×6s, eight wallets) for no real gain: photos edge to edge are cut apart with one cut between them.
+
 ## "Add photos…" stays in the toolbar, always visible, with the same name
 
 The toolbar has an **Add photos…** button at the right, even before any photo is loaded, when the blank page also shows **Choose photos…**.

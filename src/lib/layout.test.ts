@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MIN_PAGE_MARGIN, PAGE_MARGIN, PIECE_GAP, layoutSheets, type Piece, type Placement } from './layout'
+import { MIN_PAGE_MARGIN, PAGE_MARGIN, layoutSheets, type Piece, type Placement } from './layout'
 import { getPaper } from './paper'
 
 const letter = getPaper('letter')
@@ -36,7 +36,7 @@ describe('layoutSheets', () => {
   it('fits two 4×6 photos on one Letter page', () => {
     const pages = layoutSheets(pieces(2, 6, 4), letter)
     expect(pages).toHaveLength(1)
-    expect(pages[0].placements[1].y - pages[0].placements[0].y).toBe(4 + PIECE_GAP)
+    expect(pages[0].placements[1].y - pages[0].placements[0].y).toBe(4)
     expectValidPages(pages)
   })
 
@@ -67,10 +67,26 @@ describe('layoutSheets', () => {
     expectValidPages(pages.slice(1), a4)
   })
 
-  it('packs wallet photos densely without overlapping', () => {
-    const pages = layoutSheets(pieces(16, 2.5, 3.5), letter)
-    expect(pages[0].placements.length).toBe(8)
-    expectValidPages(pages)
+  it('puts photos edge to edge, all facing the same way on a page', () => {
+    const [page] = layoutSheets(pieces(9, 2.5, 3.5), letter)
+    expect(page.placements.map((p) => [p.x - page.placements[0].x, p.y - page.placements[0].y])).toEqual([
+      [0, 0], [2.5, 0], [5, 0],
+      [0, 3.5], [2.5, 3.5], [5, 3.5],
+      [0, 7], [2.5, 7], [5, 7],
+    ])
+    expect(new Set(page.placements.map((p) => p.rotated)).size).toBe(1)
+  })
+
+  it.each([
+    ['Letter', letter],
+    ['A4', a4],
+  ])('fits as many of each size on %s as Windows 7 does', (_, paper) => {
+    const perSheet = (width: number, height: number) => layoutSheets(pieces(20, width, height), paper)[0].placements.length
+    expect(perSheet(6, 4)).toBe(2)
+    expect(perSheet(7, 5)).toBe(2)
+    expect(perSheet(10, 8)).toBe(1)
+    expect(perSheet(5, 3.5)).toBe(4)
+    expect(perSheet(3.5, 2.5)).toBe(9)
   })
 
   it('keeps mixed sizes inside the margins', () => {
