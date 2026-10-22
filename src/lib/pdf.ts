@@ -1,9 +1,8 @@
-import { PDFDocument, degrees, rgb } from 'pdf-lib'
+import { PDFDocument, degrees } from 'pdf-lib'
 import type { Dimensions } from './crop'
 import type { Placement, SheetPage } from './layout'
 
 const POINTS_PER_INCH = 72
-const CUT_LINE = { color: rgb(0.55, 0.55, 0.55), width: 0.5, dash: [3, 2.5] }
 
 /**
  * Arguments for pdf-lib's drawImage that put an image, rendered upright at the
@@ -34,15 +33,6 @@ export async function buildPdf(pages: readonly SheetPage[], images: ReadonlyMap<
       const image = embedded.get(placement.key)
       if (!image) throw new Error(`No image for ${placement.key}`)
       page.drawImage(image, imageDrawArgs(placement, sheet))
-      page.drawRectangle({
-        x: placement.x * POINTS_PER_INCH,
-        y: (sheet.height - placement.y - placement.height) * POINTS_PER_INCH,
-        width: placement.width * POINTS_PER_INCH,
-        height: placement.height * POINTS_PER_INCH,
-        borderColor: CUT_LINE.color,
-        borderWidth: CUT_LINE.width,
-        borderDashArray: CUT_LINE.dash,
-      })
     }
   }
 

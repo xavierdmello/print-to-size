@@ -2,7 +2,7 @@
 
 Print a photo at the exact size of a picture frame on ordinary paper.
 
-Add one or more photos, pick a size (full page, 4×6, 5×7, 8×10, 3½×5 or wallet; on A4, the metric frame sizes 10×15, 13×18, 20×25 and 9×13 cm), choose wide or tall, and drag the photo into place right on the page, or untick **Fit picture to frame** to print the whole photo with white space around it. The app arranges the photos on a Letter or A4 sheet at their true size, with a dotted cut line around each one, and prints a PDF so the size survives the print dialog.
+Add one or more photos, pick a size (full page, 4×6, 5×7, 8×10, 3½×5 or wallet; on A4, the metric frame sizes 10×15, 13×18, 20×25 and 9×13 cm), choose wide or tall, and drag the photo into place right on the page, or untick **Fit picture to frame** to print the whole photo with white space around it. The app arranges the photos on a Letter or A4 sheet at their true size and prints a PDF so the size survives the print dialog.
 
 The look is modelled on the Windows 7 Print Pictures dialog. Everything happens in the browser; photos are never uploaded.
 
