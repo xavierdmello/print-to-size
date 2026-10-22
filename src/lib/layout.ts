@@ -14,8 +14,13 @@ export interface SheetPage {
   placements: Placement[]
 }
 
-/** Closest to the edges most home printers can print: about 3 mm at the sides, 5 mm top and bottom. */
-export const PAGE_MARGIN = { x: 0.12, y: 0.2 }
+/** Space kept around the edge of the page, comfortably inside what any home printer can reach. */
+export const PAGE_MARGIN = { x: 0.25, y: 0.25 }
+/**
+ * Closest to the edges most home printers can print: about 3 mm at the sides, 5 mm top and bottom.
+ * Used only for a photo that won't fit inside the comfortable margin, such as a full page photo.
+ */
+export const MIN_PAGE_MARGIN = { x: 0.12, y: 0.2 }
 /** Space between photos, so each can be cut out cleanly. */
 export const PIECE_GAP = 0.25
 
@@ -37,16 +42,22 @@ function orientations(piece: Piece, area: Dimensions, preferRotated: boolean): O
   )
 }
 
+function printableArea(paper: Dimensions, margin: { x: number; y: number }): Dimensions {
+  return { width: paper.width - 2 * margin.x, height: paper.height - 2 * margin.y }
+}
+
 /**
  * Arranges pieces on as few portrait pages as a simple shelf packing allows,
  * keeping their order. Each page is packed both upright-first and turned-first,
  * and whichever fits more photos wins, so photos are only turned when that saves
- * paper. Each page's arrangement is centred on the paper.
+ * paper. A page only goes out to the printer's minimum margin when its first photo
+ * won't fit otherwise. Each page's arrangement is centred on the paper.
  */
 export function layoutSheets(pieces: readonly Piece[], paper: Dimensions): SheetPage[] {
-  const area = { width: paper.width - 2 * PAGE_MARGIN.x, height: paper.height - 2 * PAGE_MARGIN.y }
+  const comfortable = printableArea(paper, PAGE_MARGIN)
+  const minimum = printableArea(paper, MIN_PAGE_MARGIN)
   for (const piece of pieces) {
-    if (orientations(piece, area, false).length === 0) {
+    if (orientations(piece, minimum, false).length === 0) {
       throw new Error(`A ${piece.width}×${piece.height} in photo does not fit on the paper`)
     }
   }
@@ -54,13 +65,18 @@ export function layoutSheets(pieces: readonly Piece[], paper: Dimensions): Sheet
   const pages: SheetPage[] = []
   let next = 0
   while (next < pieces.length) {
-    const upright = packPage(pieces, next, area, false)
-    const turned = packPage(pieces, next, area, true)
-    const best = turned.length > upright.length ? turned : upright
+    let best = bestPage(pieces, next, comfortable)
+    if (best.length === 0) best = bestPage(pieces, next, minimum)
     pages.push({ placements: centre(best, paper) })
     next += best.length
   }
   return pages
+}
+
+function bestPage(pieces: readonly Piece[], start: number, area: Dimensions): Placement[] {
+  const upright = packPage(pieces, start, area, false)
+  const turned = packPage(pieces, start, area, true)
+  return turned.length > upright.length ? turned : upright
 }
 
 /** Fills one page with pieces from `start` onwards, stopping at the first that doesn't fit. */
