@@ -24,6 +24,8 @@ src/
   components/     UI: page preview and in-place cropping, size list, controls
   state.ts        the photos on the sheet and what's been chosen for each
   experiments/    dev-only UI experiments (see below)
+docs/
+  design-decisions.md   interface choices that were questioned and settled, and why
 ```
 
 ## Experiments
