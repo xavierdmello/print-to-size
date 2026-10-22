@@ -56,6 +56,15 @@ describe('reducer', () => {
     expect(state.items[0].fit).toBe(false)
   })
 
+  it('swaps sizes for their metric counterparts when the paper changes to A4', () => {
+    let state = withPhotos(photo('a'))
+    state = reducer(state, { type: 'setSize', id: 'a', sizeId: '5x7' })
+    state = reducer(state, { type: 'setPaper', paperId: 'a4' })
+    expect([state.items[0].sizeId, state.sizeId]).toEqual(['13x18', '13x18'])
+    state = reducer(state, { type: 'setPaper', paperId: 'letter' })
+    expect(state.items[0].sizeId).toBe('5x7')
+  })
+
   it('keeps copies between one and the maximum', () => {
     let state = withPhotos(photo('a'))
     state = reducer(state, { type: 'setCopies', id: 'a', copies: 0 })

@@ -54,3 +54,9 @@ Shape is just **Wide** or **Tall**, and a **Fit picture to frame** checkbox in t
 - **It's the Windows 7 control, word for word.** Its "Fit picture to frame" checkbox is clear to people who've used it, and the preview updates the moment it's ticked or unticked, so anyone who reads "fit" the other way sees the result straight away.
 - **Nothing hides.** With the box unticked, or no photo yet, the crop buttons grey out in place rather than disappearing. They sit under the preview, where Windows 7 puts its page arrows, which keeps the bottom bar to Copies and this checkbox.
 
+## A4 offers metric frame sizes
+
+With Letter paper the sizes are in inches; with A4 they are the metric frame sizes sold where A4 is used: 10 × 15, 13 × 18, 20 × 25 and 9 × 13 cm, plus Full page photo and Wallet. Switching paper swaps each photo's size for its counterpart (4 × 6 in. ↔ 10 × 15 cm, 5 × 7 in. ↔ 13 × 18 cm, 8 × 10 in. ↔ 20 × 25 cm, 3½ × 5 in. ↔ 9 × 13 cm).
+
+**Why:** the inch sizes printed exactly on A4, but they don't match metric frames: a 4 × 6 in. print is about 2 mm too big for a 10 × 15 cm frame, and a 5 × 7 in. print about 3 mm too small for a 13 × 18 cm one. Windows 7 switches to centimetre sizes on A4 for the same reason.
+

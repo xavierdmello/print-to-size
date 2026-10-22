@@ -15,18 +15,19 @@ import { layoutSheets } from './lib/layout'
 import { PAPERS, defaultPaperFor, getPaper, isPaperId } from './lib/paper'
 import { loadPhoto, looksLikePhoto, releasePhoto } from './lib/photo'
 import { preparePrintWindow, printPdf, savePdf } from './lib/print'
-import { DEFAULT_SIZE, isSizeId, type SizeId } from './lib/sizes'
+import { defaultSizeFor, isSizeId, sizeForPaper, type SizeId } from './lib/sizes'
 import { readSetting, writeSetting } from './lib/storage'
 import { MAX_COPIES, reducer, sheetPieces, type AppState, type PrintItem } from './state'
 
 function initialState(): AppState {
-  const paper = readSetting('paper')
-  const size = readSetting('size')
+  const savedPaper = readSetting('paper')
+  const savedSize = readSetting('size')
+  const paperId = isPaperId(savedPaper) ? savedPaper : defaultPaperFor(navigator.language)
   return {
     items: [],
     selectedId: null,
-    paperId: isPaperId(paper) ? paper : defaultPaperFor(navigator.language),
-    sizeId: isSizeId(size) ? size : DEFAULT_SIZE,
+    paperId,
+    sizeId: isSizeId(savedSize) ? sizeForPaper(savedSize, paperId) : defaultSizeFor(paperId),
   }
 }
 

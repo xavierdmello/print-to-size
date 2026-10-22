@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { Shape } from '../lib/crop'
 import { layoutSheets } from '../lib/layout'
 import type { Paper } from '../lib/paper'
-import { SIZE_IDS, getSize, type SizeId } from '../lib/sizes'
+import { getSize, sizesFor, type SizeId } from '../lib/sizes'
 import samplePhoto from './sample-photo.svg'
 
 /** Enough copies to fill a page with even the smallest size. */
@@ -19,7 +19,7 @@ interface SizeListProps {
 export function SizeList({ shape, paper, sizeId, onChange }: SizeListProps) {
   const sheets = useMemo(
     () =>
-      SIZE_IDS.map((id) => {
+      sizesFor(paper.id).map((id) => {
         const size = getSize(id, paper)
         const tall = shape === 'tall'
         const piece = { key: id, width: tall ? size.short : size.long, height: tall ? size.long : size.short }

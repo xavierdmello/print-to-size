@@ -2,7 +2,7 @@ import { CENTERED, naturalShape, printDimensions, type Crop, type Dimensions, ty
 import type { Piece } from './lib/layout'
 import type { PaperId } from './lib/paper'
 import type { Photo } from './lib/photo'
-import { getSize, type SizeId } from './lib/sizes'
+import { getSize, sizeForPaper, type SizeId } from './lib/sizes'
 
 export const MAX_COPIES = 24
 
@@ -79,7 +79,13 @@ export function reducer(state: AppState, action: Action): AppState {
         copies: Math.min(MAX_COPIES, Math.max(1, action.copies)),
       }))
     case 'setPaper':
-      return { ...state, paperId: action.paperId }
+      // Each photo keeps its size, or takes the matching size this paper offers (4×6 in. ↔ 10×15 cm).
+      return {
+        ...state,
+        paperId: action.paperId,
+        sizeId: sizeForPaper(state.sizeId, action.paperId),
+        items: state.items.map((item) => ({ ...item, sizeId: sizeForPaper(item.sizeId, action.paperId) })),
+      }
     case 'setDefaultSize':
       return { ...state, sizeId: action.sizeId }
   }
