@@ -5,11 +5,21 @@
  * A separate crop stage: the photo in a window on its own backdrop, which the frame
  * experiment dresses up as a framed picture on a wall.
  */
-import { useEffect, useEffectEvent, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
+import {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from 'react'
 import { CENTERED, cropRect, panCrop, zoomCrop, type Crop, type Dimensions } from '../../lib/crop'
 import { itemCrop, itemDimensions, type PrintItem } from '../../state'
 import { PhotoCrop } from '../../components/PhotoCrop'
 import { NUDGE, ZOOM_STEP, photoPlacement } from '../../components/placement'
+import type { Selection } from '../../components/selection'
 import { useElementSize } from '../../components/useElementSize'
 
 interface CropEditorProps {
@@ -19,6 +29,10 @@ interface CropEditorProps {
   className?: string
   /** Space kept around the crop, as a fraction of the stage width. */
   room?: number
+  showCutOff?: boolean
+  intro?: boolean
+  onIntroEnd?: () => void
+  renderSelected?: (selection: Selection) => ReactNode
 }
 
 function fitWindow(stage: Dimensions, aspect: number, room: number): Dimensions {
@@ -27,7 +41,17 @@ function fitWindow(stage: Dimensions, aspect: number, room: number): Dimensions 
   return { width: Math.max(0, width), height: Math.max(0, width / aspect) }
 }
 
-export function CropEditor({ item, paper, onCrop, className, room = 0.07 }: CropEditorProps) {
+export function CropEditor({
+  item,
+  paper,
+  onCrop,
+  className,
+  room = 0.07,
+  showCutOff = false,
+  intro = false,
+  onIntroEnd,
+  renderSelected,
+}: CropEditorProps) {
   const stageRef = useRef<HTMLDivElement>(null)
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const [dragging, setDragging] = useState(false)
@@ -114,7 +138,16 @@ export function CropEditor({ item, paper, onCrop, className, room = 0.07 }: Crop
   return (
     <div
       ref={stageRef}
-      className={['crop-stage', editable && 'is-editable', dragging && 'is-panning', className].filter(Boolean).join(' ')}
+      className={[
+        'crop-stage',
+        editable && 'is-editable',
+        dragging && 'is-panning',
+        showCutOff && 'shows-cut-off',
+        intro && editable && 'is-intro',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       tabIndex={editable ? 0 : -1}
       role={editable ? 'application' : undefined}
       aria-label={editable ? 'Photo crop. Drag the photo, or use the arrow keys to move the crop and plus and minus to zoom.' : undefined}
@@ -131,13 +164,19 @@ export function CropEditor({ item, paper, onCrop, className, room = 0.07 }: Crop
           style={{ width: frame.width, height: frame.height, '--ppi': `${frame.width / print.width}px` } as CSSProperties}
         >
           {editable ? (
-            <>
-              <img className="crop-photo" src={photo.url} alt="" draggable={false} style={photoPlacement(photo, rect)} />
-              <div className="crop-shade" />
-            </>
+            <img className="crop-photo" src={photo.url} alt="" draggable={false} style={photoPlacement(photo, rect)} />
           ) : (
             <PhotoCrop photo={photo} fit={false} crop={CENTERED} print={print} />
           )}
+          <div className="crop-shade" onAnimationEnd={onIntroEnd} />
+          {renderSelected?.({
+            item,
+            print,
+            box: frame,
+            pxPerInch: frame.width / print.width,
+            editable,
+            resizable: false,
+          })}
         </div>
       )}
     </div>

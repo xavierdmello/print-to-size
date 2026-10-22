@@ -14,6 +14,7 @@ import type { Paper } from '../lib/paper'
 import { itemCrop, itemDimensions, type PrintItem } from '../state'
 import { PhotoCrop } from './PhotoCrop'
 import { NUDGE, ZOOM_STEP, photoPlacement, screenToPhoto } from './placement'
+import type { Selection } from './selection'
 import { useElementSize } from './useElementSize'
 
 interface PageEditorProps {
@@ -25,6 +26,15 @@ interface PageEditorProps {
   onCrop: (item: PrintItem, crop: Crop) => void
   /** Shown on the blank page when there are no photos yet. */
   empty?: ReactNode
+  /** Keep the parts of the selected photo that the crop leaves out faintly visible. */
+  showCutOff?: boolean
+  /** A photo that was just added: its cut-off parts start fully visible and fade away, once. */
+  introId?: string | null
+  onIntroEnd?: () => void
+  /** An extra class on the selected photo. */
+  selectedClassName?: string
+  /** Drawn over the selected photo, sized to it on screen. */
+  renderSelected?: (selection: Selection) => ReactNode
 }
 
 /** Screen space kept around the page in the preview. */
@@ -48,7 +58,20 @@ function uprightStyle(placement: Placement): CSSProperties | undefined {
 }
 
 /** The printed page, where the selected photo can be dragged, pinched or nudged inside its space. */
-export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, empty }: PageEditorProps) {
+export function PageEditor({
+  pages,
+  paper,
+  items,
+  selectedId,
+  onSelect,
+  onCrop,
+  empty,
+  showCutOff = false,
+  introId = null,
+  onIntroEnd,
+  selectedClassName,
+  renderSelected,
+}: PageEditorProps) {
   const areaRef = useRef<HTMLDivElement>(null)
   const pageRef = useRef<HTMLDivElement>(null)
   const area = useElementSize(areaRef)
@@ -170,6 +193,17 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
           onKeyDown={onKeyDown}
         >
           {!current && empty}
+          {selected && selectedPlacement && selected.fit && (showCutOff || introId === selected.id) && (
+            <CutOff
+              item={selected}
+              placement={selectedPlacement}
+              print={itemDimensions(selected, paper)}
+              pxPerInch={pxPerInch}
+              shown={showCutOff}
+              intro={introId === selected.id}
+              onIntroEnd={onIntroEnd}
+            />
+          )}
           {current?.placements.map((placement, index) => {
             const item = byId.get(placement.key)
             if (!item) return null
@@ -180,7 +214,12 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
             return (
               <div
                 key={`${placement.key}-${index}`}
-                className={['page-piece', isSelected && 'is-selected', isSelected && editable && 'is-editable']
+                className={[
+                  'page-piece',
+                  isSelected && 'is-selected',
+                  isSelected && editable && 'is-editable',
+                  isSelected && selectedClassName,
+                ]
                   .filter(Boolean)
                   .join(' ')}
                 style={{
@@ -206,6 +245,15 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
                   )}
                   <PhotoCrop photo={item.photo} fit={item.fit} crop={crop} print={print} />
                 </div>
+                {placement === selectedPlacement &&
+                  renderSelected?.({
+                    item,
+                    print: { width: placement.width, height: placement.height },
+                    box: { width: placement.width * pxPerInch, height: placement.height * pxPerInch },
+                    pxPerInch,
+                    editable,
+                    resizable: true,
+                  })}
               </div>
             )
           })}
@@ -236,6 +284,44 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
           </button>
         </nav>
       )}
+    </div>
+  )
+}
+
+interface CutOffProps {
+  item: PrintItem
+  placement: Placement
+  print: Dimensions
+  pxPerInch: number
+  shown: boolean
+  intro: boolean
+  onIntroEnd?: () => void
+}
+
+/**
+ * The whole photo, faint, behind the page's photos, so the parts the crop leaves out show
+ * around the selected one without covering its neighbours.
+ */
+function CutOff({ item, placement, print, pxPerInch, shown, intro, onIntroEnd }: CutOffProps) {
+  return (
+    <div
+      className={['cut-off', shown && 'is-shown', intro && 'is-intro'].filter(Boolean).join(' ')}
+      style={{
+        left: placement.x * pxPerInch,
+        top: placement.y * pxPerInch,
+        width: placement.width * pxPerInch,
+        height: placement.height * pxPerInch,
+      }}
+      onAnimationEnd={onIntroEnd}
+    >
+      <div className="page-piece-upright" style={uprightStyle(placement)}>
+        <img
+          src={item.photo.url}
+          alt=""
+          draggable={false}
+          style={photoPlacement(item.photo, cropRect(item.photo, print.width / print.height, itemCrop(item)))}
+        />
+      </div>
     </div>
   )
 }
