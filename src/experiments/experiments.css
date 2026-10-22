@@ -38,8 +38,26 @@
 }
 
 .dev-panel small {
-  max-width: 180px;
+  max-width: 200px;
   color: #a4abb5;
+}
+
+.dev-panel fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 6px 0 0;
+  border: 0;
+  border-top: 1px solid #2c3036;
+}
+
+.dev-panel legend {
+  padding: 0 0 4px;
+  color: #8f98a3;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 /* The separate crop stage the frame experiment uses in place of the page preview. */
@@ -104,15 +122,47 @@
   background: var(--wall);
 }
 
+/* How much of the wall covers what's outside the frame: all of it, unless something below says otherwise. */
+@property --shade {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+.experiment-frame-crop {
+  --shade: 1;
+  --shade-rest: 1;
+}
+
 .experiment-frame-crop .crop-shade {
   outline: none;
-  box-shadow: 0 0 0 200vmax var(--wall);
-  transition: box-shadow 0.15s;
+  box-shadow: 0 0 0 200vmax color-mix(in srgb, var(--wall) calc(var(--shade) * 100%), transparent);
+}
+
+/* Cut-off parts always visible: a little of what's outside the frame shows through. */
+.experiment-frame-crop.shows-cut-off {
+  --shade: 0.75;
+  --shade-rest: 0.75;
 }
 
 /* While the photo is being moved, show what's outside the frame. */
-.experiment-frame-crop.is-panning .crop-shade {
-  box-shadow: 0 0 0 200vmax color-mix(in srgb, var(--wall) 82%, transparent);
+.experiment-frame-crop.is-panning {
+  --shade: 0.6;
+}
+
+/* Crop-in animation: the whole photo shows, then the wall closes in around the frame. */
+.experiment-frame-crop.is-intro .crop-shade {
+  animation: frame-intro 1s ease-in-out both;
+}
+
+@keyframes frame-intro {
+  0%,
+  35% {
+    --shade: 0;
+  }
+  100% {
+    --shade: var(--shade-rest);
+  }
 }
 
 .experiment-frame-crop .crop-shade::before {
@@ -211,3 +261,206 @@
   inset: 0;
   pointer-events: none;
 }
+
+/* Things drawn on the selected photo (see onPhoto/PhotoOverlay.tsx). */
+
+.photo-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Inside the frame experiment, marks and the switch sit outside the moulding. */
+.experiment-frame-crop .photo-overlay {
+  --outside: calc(var(--moulding) - var(--lip));
+}
+
+.photo-overlay {
+  --outside: 0px;
+}
+
+.size-mark {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a5562;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.size-mark::before {
+  content: '';
+  position: absolute;
+  border-color: currentColor;
+  border-style: solid;
+  border-width: 0;
+}
+
+.size-mark > span {
+  position: relative;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.12);
+}
+
+.size-mark.is-top {
+  left: 50%;
+  top: calc(-1 * var(--outside) - 18px);
+  height: 12px;
+  transform: translateX(-50%);
+  border-left: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+}
+
+.size-mark.is-top::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top-width: 1px;
+}
+
+.size-mark.is-left {
+  top: 50%;
+  left: calc(-1 * var(--outside) - 18px);
+  width: 12px;
+  transform: translateY(-50%);
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+}
+
+.size-mark.is-left::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left-width: 1px;
+}
+
+.size-mark.is-left > span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.shape-switch {
+  position: absolute;
+  top: calc(-1 * var(--outside) - 34px);
+  right: calc(-1 * var(--outside) - 34px);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--control-line, #acacac);
+  border-radius: 50%;
+  background: #fff;
+  color: #1b1b1b;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.shape-switch:hover {
+  border-color: var(--hover-line, #7eb4ea);
+  background: var(--hover, #e5f1fb);
+}
+
+.has-move-hint.is-editable {
+  cursor: move;
+}
+
+.has-move-hint.is-editable:active {
+  cursor: move;
+}
+
+.move-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.5);
+  color: #fff;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.15s;
+}
+
+.page-piece:hover .move-hint,
+.crop-stage:hover .move-hint {
+  opacity: 1;
+}
+
+.drag-caption {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.resize-handle {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--focus, #3a8be0);
+  border-radius: 2px;
+  background: #fff;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.resize-preview {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border: 1.5px dashed var(--focus, #3a8be0);
+  background: rgb(58 139 224 / 0.08);
+  transform: translate(-50%, -50%);
+}
+
+.resize-preview > span {
+  margin-bottom: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--focus, #3a8be0);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Width and height boxes under the Custom size. */
+
+.custom-size {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 0 8px;
+  font-size: 0.9rem;
+}
+
+.custom-size input {
+  width: 52px;
+  min-height: 30px;
+  padding: 0 4px;
+  border: 1px solid var(--control-line, #acacac);
+  border-radius: 3px;
+  background: var(--content, #fff);
+  color: inherit;
+  font: inherit;
+}
+

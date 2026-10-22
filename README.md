@@ -34,8 +34,19 @@ This repo is a prototype. Besides the core app it contains a few UI experiments 
 
 | Switch | Idea being tested |
 | --- | --- |
+| Cut-off parts always visible | The parts of the photo the crop leaves out show faintly around it, behind the other photos |
+| Crop-in animation | When a photo is added, it shows whole, then the crop closes in (skipped for reduced motion) |
+| Move cursor and icon | A move cursor and a four-arrow icon on the selected photo when hovering |
+| "Drag to move" caption | A small caption on the selected photo |
+| Size marks | Measurement lines along the top and left edge with the printed size, in inches or cm |
+| Wide/tall switch | A button at the photo's corner that switches the frame between wide and tall |
+| Drag edges to resize | Handles on the photo's edges; dragging resizes it, snapping to standard sizes or becoming Custom |
+| Square and passport sizes | 4×4, 5×5, 8×8 in. and 2×2 in. passport (10×10, 13×13, 20×20 cm and 35×45 mm on A4) |
+| Custom size | A Custom entry in the size list with width and height boxes |
 | Frame crop | Crop by sliding the photo behind a drawn picture frame instead of on the page |
 | Real size | Show the print at its true physical size on screen, after a one-time calibration against a bank card |
 | Smart crop | Start the crop centred, but shift it just enough to avoid cutting through a face (on-device face detection) |
+
+The switches are independent and can be combined; anything drawn on the photo is laid out so all of it fits together. In the frame crop view, resize handles are left out because that view rescales the frame as it changes size.
 
 **The experiment code is throwaway.** It exists to answer design questions, not as a pattern to build on. The switch mechanism, the `src/experiments/` folder and anything gated by it should not be treated as normal practice or extended. Once an experiment is judged, either delete it or rebuild the winning idea properly in the core app, without the switch.

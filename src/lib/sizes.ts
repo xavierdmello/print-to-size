@@ -80,11 +80,11 @@ const FIXED: Record<Exclude<SizeId, 'full' | 'custom'>, Omit<PrintSize, 'id'>> =
   '4x4': { label: '4 × 4 in.', short: 4, long: 4 },
   '5x5': { label: '5 × 5 in.', short: 5, long: 5 },
   '8x8': { label: '8 × 8 in.', short: 8, long: 8 },
-  'passport-us': { label: 'Passport (2 × 2 in.)', short: 2, long: 2 },
+  'passport-us': { label: 'Passport 2 × 2 in.', short: 2, long: 2 },
   '10x10': { label: '10 × 10 cm', short: 10 * CM, long: 10 * CM },
   '13x13': { label: '13 × 13 cm', short: 13 * CM, long: 13 * CM },
   '20x20': { label: '20 × 20 cm', short: 20 * CM, long: 20 * CM },
-  'passport-eu': { label: 'Passport (35 × 45 mm)', short: 3.5 * CM, long: 4.5 * CM },
+  'passport-eu': { label: 'Passport 35 × 45 mm', short: 3.5 * CM, long: 4.5 * CM },
 }
 
 /** The smallest custom size that's still practical to cut out. */

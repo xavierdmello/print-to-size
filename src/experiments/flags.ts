@@ -12,9 +12,34 @@ export interface DevFlags {
   frameStyle: FrameStyle
   realSize: boolean
   smartCrop: boolean
+  showCutOff: boolean
+  cropIntro: boolean
+  moveHint: boolean
+  dragCaption: boolean
+  sizeMarks: boolean
+  shapeSwitch: boolean
+  moreSizes: boolean
+  customSize: boolean
+  dragResize: boolean
 }
 
-const OFF: DevFlags = { frameCrop: false, frameStyle: 'black', realSize: false, smartCrop: false }
+export type Switch = Exclude<keyof DevFlags, 'frameStyle'>
+
+const OFF: DevFlags = {
+  frameCrop: false,
+  frameStyle: 'black',
+  realSize: false,
+  smartCrop: false,
+  showCutOff: false,
+  cropIntro: false,
+  moveHint: false,
+  dragCaption: false,
+  sizeMarks: false,
+  shapeSwitch: false,
+  moreSizes: false,
+  customSize: false,
+  dragResize: false,
+}
 
 /** The switch panel only exists when the page is opened with `?dev`. */
 export const DEV_MODE = new URLSearchParams(location.search).has('dev')

@@ -10,6 +10,7 @@ import { CropEditor } from './experiments/frameCrop/CropEditor'
 import { frameCropProps } from './experiments/frameCrop/frameCrop'
 import { RealSizeButton } from './experiments/RealSize'
 import { useSmartCrop } from './experiments/smartCrop/useSmartCrop'
+import { useExperiments } from './experiments/useExperiments'
 import type { Crop } from './lib/crop'
 import { layoutSheets } from './lib/layout'
 import { PAPERS, defaultPaperFor, getPaper, isPaperId } from './lib/paper'
@@ -45,6 +46,7 @@ export default function App() {
   const itemRotated = pages.some((page) => page.placements.some((p) => p.key === item?.id && p.rotated))
 
   const smartCropStatus = useSmartCrop(state.items, paper, flags.smartCrop, dispatch)
+  const experiments = useExperiments(flags, paper, state.items, item, dispatch)
 
   useEffect(() => writeSetting('paper', state.paperId), [state.paperId])
   useEffect(() => writeSetting('size', state.sizeId), [state.sizeId])
@@ -103,6 +105,7 @@ export default function App() {
   }
 
   function setSize(sizeId: SizeId) {
+    if (experiments.chooseSize(sizeId)) return
     dispatch(item ? { type: 'setSize', id: item.id, sizeId } : { type: 'setDefaultSize', sizeId })
   }
 
@@ -190,7 +193,17 @@ export default function App() {
       <div className="dialog-body">
         <section className="preview" aria-label="Preview">
           {flags.frameCrop && item ? (
-            <CropEditor item={item} paper={paper} onCrop={(crop) => setCrop(item, crop)} {...frameCropProps(flags)} />
+            <CropEditor
+              item={item}
+              paper={paper}
+              onCrop={(crop) => setCrop(item, crop)}
+              room={frameCropProps(flags).room}
+              className={[frameCropProps(flags).className, experiments.frame.moveHintClass].filter(Boolean).join(' ')}
+              showCutOff={experiments.frame.showCutOff}
+              intro={experiments.frame.intro}
+              onIntroEnd={experiments.frame.onIntroEnd}
+              renderSelected={experiments.frame.renderSelected}
+            />
           ) : (
             <PageEditor
               pages={pages}
@@ -207,6 +220,7 @@ export default function App() {
                   <span className="drop-hint">or drop them here</span>
                 </div>
               }
+              {...experiments.page}
             />
           )}
           <div className="preview-controls">
@@ -218,7 +232,13 @@ export default function App() {
             />
           </div>
         </section>
-        <SizeList shape={item?.shape ?? 'wide'} paper={paper} sizeId={item?.sizeId ?? state.sizeId} onChange={setSize} />
+        <SizeList
+          shape={item?.shape ?? 'wide'}
+          paper={paper}
+          sizeId={item?.sizeId ?? state.sizeId}
+          onChange={setSize}
+          {...experiments.sizeList}
+        />
       </div>
 
       <div className="options-bar">
