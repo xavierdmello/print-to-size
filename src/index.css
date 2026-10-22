@@ -352,6 +352,8 @@ select {
   min-height: 0;
   display: grid;
   place-items: center;
+  /* Keeps the faint cut-off parts of a photo inside the preview, off the controls around it. */
+  overflow: hidden;
 }
 
 .preview-controls {
@@ -465,6 +467,7 @@ select {
 
 .page-nav {
   position: absolute;
+  z-index: 2;
   bottom: 6px;
   left: 50%;
   display: flex;

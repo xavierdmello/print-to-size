@@ -37,8 +37,8 @@ interface PageEditorProps {
   renderSelected?: (selection: Selection) => ReactNode
 }
 
-/** Screen space kept around the page in the preview. */
-const ROOM = 28
+/** Screen space kept around the page in the preview, enough for marks drawn just outside a photo. */
+const ROOM = 44
 
 function fitPage(area: Dimensions, sheet: Dimensions): Dimensions {
   const width = Math.min(area.width - ROOM * 2, ((area.height - ROOM * 2) * sheet.width) / sheet.height)
