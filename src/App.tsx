@@ -33,7 +33,6 @@ function initialState(): AppState {
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState)
   const [flags, setFlags] = useDevFlags()
-  const smartCropStatus = useSmartCrop(state.items, flags.smartCrop, dispatch)
   const [busy, setBusy] = useState<'print' | 'save' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [dropping, setDropping] = useState(false)
@@ -41,8 +40,10 @@ export default function App() {
 
   const item = state.items.find((candidate) => candidate.id === state.selectedId) ?? null
   const paper = getPaper(state.paperId)
-  const pages = useMemo(() => layoutSheets(sheetPieces(state.items), paper), [state.items, paper])
+  const pages = useMemo(() => layoutSheets(sheetPieces(state.items, paper), paper), [state.items, paper])
   const itemRotated = pages.some((page) => page.placements.some((p) => p.key === item?.id && p.rotated))
+
+  const smartCropStatus = useSmartCrop(state.items, paper, flags.smartCrop, dispatch)
 
   useEffect(() => writeSetting('paper', state.paperId), [state.paperId])
   useEffect(() => writeSetting('size', state.sizeId), [state.sizeId])
@@ -186,7 +187,7 @@ export default function App() {
       <div className="dialog-body">
         <section className="preview" aria-label="Preview">
           {flags.frameCrop && item ? (
-            <CropEditor item={item} onCrop={(crop) => setCrop(item, crop)} {...frameCropProps(flags)} />
+            <CropEditor item={item} paper={paper} onCrop={(crop) => setCrop(item, crop)} {...frameCropProps(flags)} />
           ) : (
             <PageEditor
               pages={pages}
@@ -206,7 +207,7 @@ export default function App() {
             />
           )}
         </section>
-        <SizeList item={item} sizeId={item?.sizeId ?? state.sizeId} onChange={setSize} />
+        <SizeList shape={item?.shape ?? 'wide'} paper={paper} sizeId={item?.sizeId ?? state.sizeId} onChange={setSize} />
       </div>
 
       <div className="options-bar">
@@ -234,9 +235,9 @@ export default function App() {
             </button>
           </div>
         </div>
-        <AdjustPad item={item} rotated={itemRotated && !flags.frameCrop} onCrop={(crop) => item && setCrop(item, crop)} />
+        <AdjustPad item={item} paper={paper} rotated={itemRotated && !flags.frameCrop} onCrop={(crop) => item && setCrop(item, crop)} />
         <div className="options-end">
-          {flags.realSize && item && <RealSizeButton item={item} framed={frameCropProps(flags).className} />}
+          {flags.realSize && item && <RealSizeButton item={item} paper={paper} framed={frameCropProps(flags).className} />}
           {item && (
             <button type="button" className="link-button" onClick={() => removeItem(item)}>
               Remove photo

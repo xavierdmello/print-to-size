@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f7fd3"/>
+      <stop offset="1" stop-color="#b9e0f6"/>
+    </linearGradient>
+    <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5fa3d8"/>
+      <stop offset="1" stop-color="#2b6fae"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="200" fill="url(#sky)"/>
+  <g fill="#fff" opacity="0.9">
+    <ellipse cx="70" cy="42" rx="34" ry="9"/>
+    <ellipse cx="92" cy="36" rx="20" ry="10"/>
+    <ellipse cx="215" cy="58" rx="40" ry="8"/>
+    <ellipse cx="236" cy="52" rx="18" ry="9"/>
+  </g>
+  <path d="M0 128 L58 82 L96 108 L150 64 L206 104 L248 80 L300 112 V200 H0 Z" fill="#7ea6c9"/>
+  <path d="M0 140 C60 112 110 124 160 132 C210 140 250 118 300 126 V200 H0 Z" fill="#4f9a3f"/>
+  <path d="M0 152 C70 136 140 146 190 150 C240 154 270 144 300 146 V200 H0 Z" fill="#3a7f32"/>
+  <rect y="160" width="300" height="40" fill="url(#lake)"/>
+  <path d="M40 168 H110 M150 176 H230 M70 186 H140" stroke="#cfe8f8" stroke-width="2" opacity="0.6"/>
+</svg>

@@ -7,7 +7,7 @@
  * Reset lands back on the suggestion).
  */
 import { useEffect, useRef, useState, type Dispatch } from 'react'
-import { CENTERED, printDimensions, type Crop, type CropShape } from '../../lib/crop'
+import { CENTERED, printDimensions, type Crop, type CropShape, type Dimensions } from '../../lib/crop'
 import { getSize } from '../../lib/sizes'
 import type { Action, PrintItem } from '../../state'
 import { detectFaces } from './detectFaces'
@@ -19,7 +19,12 @@ function same(a: Crop, b: Crop): boolean {
   return Math.abs(a.zoom - b.zoom) < 1e-6 && Math.abs(a.cx - b.cx) < 1e-6 && Math.abs(a.cy - b.cy) < 1e-6
 }
 
-export function useSmartCrop(items: readonly PrintItem[], enabled: boolean, dispatch: Dispatch<Action>): string {
+export function useSmartCrop(
+  items: readonly PrintItem[],
+  paper: Dimensions,
+  enabled: boolean,
+  dispatch: Dispatch<Action>,
+): string {
   const [faces, setFaces] = useState(new Map<string, Face[]>())
   const [status, setStatus] = useState('')
   const requested = useRef(new Set<string>())
@@ -53,13 +58,13 @@ export function useSmartCrop(items: readonly PrintItem[], enabled: boolean, disp
         const current = item.crops[shape]
         const previous = applied.current.get(key)
         if (!same(current, CENTERED) && !(previous && same(current, previous))) continue
-        const print = printDimensions(getSize(item.sizeId), shape, item.photo)
+        const print = printDimensions(getSize(item.sizeId, paper), shape, item.photo)
         const suggested = nudgeForFaces(item.photo, print.width / print.height, CENTERED, found)
         applied.current.set(key, suggested)
         if (!same(current, suggested)) dispatch({ type: 'setCrop', id: item.id, shape, crop: suggested })
       }
     }
-  }, [items, faces, enabled, dispatch])
+  }, [items, paper, faces, enabled, dispatch])
 
   return status
 }

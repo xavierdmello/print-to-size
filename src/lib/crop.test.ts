@@ -8,11 +8,12 @@ import {
   printDimensions,
   zoomCrop,
 } from './crop'
+import { getPaper } from './paper'
 import { getSize } from './sizes'
 
 const iphone = { width: 4032, height: 3024 } // 4:3
 const tallPhone = { width: 1080, height: 2160 } // 1:2
-const fourBySix = getSize('4x6')
+const fourBySix = getSize('4x6', getPaper('letter'))
 
 describe('printDimensions', () => {
   it('lays the long side horizontally for wide and vertically for tall', () => {

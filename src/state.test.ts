@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { getPaper } from './lib/paper'
 import type { Photo } from './lib/photo'
 import { MAX_COPIES, reducer, sheetPieces, type AppState } from './state'
 
@@ -61,7 +62,7 @@ describe('sheetPieces', () => {
   it('lists every copy at its printed size', () => {
     let state = withPhotos(photo('a'), photo('b', 1080, 2160))
     state = reducer(state, { type: 'setCopies', id: 'b', copies: 2 })
-    expect(sheetPieces(state.items)).toEqual([
+    expect(sheetPieces(state.items, getPaper('letter'))).toEqual([
       { key: 'a', width: 6, height: 4 },
       { key: 'b', width: 4, height: 6 },
       { key: 'b', width: 4, height: 6 },

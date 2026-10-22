@@ -7,12 +7,12 @@ import { itemCrop, sheetPieces, type PrintItem } from './state'
 
 export async function makeSheetPdf(items: readonly PrintItem[], paperId: PaperId): Promise<Uint8Array> {
   const paper = getPaper(paperId)
-  const pages = layoutSheets(sheetPieces(items), paper)
+  const pages = layoutSheets(sheetPieces(items, paper), paper)
   const images = new Map<string, Uint8Array>()
   for (const item of items) {
     images.set(
       item.id,
-      await renderPrint(item.photo.bitmap, item.photo, getSize(item.sizeId), item.shape, itemCrop(item)),
+      await renderPrint(item.photo.bitmap, item.photo, getSize(item.sizeId, paper), item.shape, itemCrop(item)),
     )
   }
   return buildPdf(pages, paper, images)

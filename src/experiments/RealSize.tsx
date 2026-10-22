@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from 'react'
 import { PhotoCrop } from '../components/PhotoCrop'
+import type { Dimensions } from '../lib/crop'
 import { readSetting, writeSetting } from '../lib/storage'
 import { itemCrop, itemDimensions, type PrintItem } from '../state'
 
@@ -30,11 +31,12 @@ function loadCalibration(): Calibration | null {
 
 interface RealSizeProps {
   item: PrintItem
+  paper: Dimensions
   framed: string | undefined
   onClose: () => void
 }
 
-export function RealSizeView({ item, framed, onClose }: RealSizeProps) {
+export function RealSizeView({ item, paper, framed, onClose }: RealSizeProps) {
   const [calibration, setCalibration] = useState(loadCalibration)
   const [calibrating, setCalibrating] = useState(calibration === null)
   const [pxPerInch, setPxPerInch] = useState(calibration?.pxPerInch ?? 110)
@@ -52,7 +54,7 @@ export function RealSizeView({ item, framed, onClose }: RealSizeProps) {
     setCalibrating(false)
   }
 
-  const print = itemDimensions(item)
+  const print = itemDimensions(item, paper)
 
   return (
     <div className="real-size" role="dialog" aria-modal="true" aria-label="Real size">
@@ -110,14 +112,14 @@ export function RealSizeView({ item, framed, onClose }: RealSizeProps) {
 }
 
 /** The button that opens the real-size view, for the editor footer. */
-export function RealSizeButton({ item, framed }: Omit<RealSizeProps, 'onClose'>) {
+export function RealSizeButton({ item, paper, framed }: Omit<RealSizeProps, 'onClose'>) {
   const [open, setOpen] = useState(false)
   return (
     <>
       <button type="button" className="button" onClick={() => setOpen(true)}>
         See real size
       </button>
-      {open && <RealSizeView item={item} framed={framed} onClose={() => setOpen(false)} />}
+      {open && <RealSizeView item={item} paper={paper} framed={framed} onClose={() => setOpen(false)} />}
     </>
   )
 }

@@ -74,7 +74,7 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
 
   function pan(dxScreen: number, dyScreen: number) {
     if (!selected || !editable || !selectedPlacement) return
-    const print = itemDimensions(selected)
+    const print = itemDimensions(selected, paper)
     const aspect = print.width / print.height
     const crop = itemCrop(selected)
     const [dx, dy] = screenToPhoto(dxScreen, dyScreen, selectedPlacement.rotated)
@@ -84,7 +84,7 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
 
   function zoom(factor: number) {
     if (!selected || !editable) return
-    const print = itemDimensions(selected)
+    const print = itemDimensions(selected, paper)
     onCrop(selected, zoomCrop(selected.photo, print.width / print.height, itemCrop(selected), factor))
   }
 
@@ -171,7 +171,7 @@ export function PageEditor({ pages, paper, items, selectedId, onSelect, onCrop, 
             const item = byId.get(placement.key)
             if (!item) return null
             const isSelected = item.id === selectedId
-            const print = itemDimensions(item)
+            const print = itemDimensions(item, paper)
             const crop = itemCrop(item)
             const ghost = isSelected && panning && item.shape !== 'whole'
             return (

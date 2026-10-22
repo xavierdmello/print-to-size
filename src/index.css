@@ -464,25 +464,18 @@ select {
   background: var(--selected);
 }
 
-.size-thumb {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 110px;
-  height: 104px;
-}
-
-.photo-crop.size-thumb-photo {
+.size-sheet {
   position: relative;
-  inset: auto;
-  flex: none;
-  box-shadow: 0 0 0 1px var(--paper-edge);
+  display: block;
+  height: 96px;
+  background: var(--paper);
+  box-shadow: 0 0 0 1px var(--paper-edge), 0 1px 3px rgb(0 0 0 / 0.15);
 }
 
-.size-thumb-blank {
-  display: block;
-  border: 1px solid var(--control-line);
-  background: var(--preview);
+.size-sheet img {
+  position: absolute;
+  max-width: none;
+  object-fit: cover;
 }
 
 .size-label {
@@ -521,9 +514,8 @@ select {
     flex: none;
   }
 
-  .size-thumb {
-    width: 96px;
-    height: 100px;
+  .size-sheet {
+    height: 84px;
   }
 
   .toolbar-end {

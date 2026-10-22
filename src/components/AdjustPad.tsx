@@ -1,10 +1,11 @@
-import { CENTERED, MAX_ZOOM, cropRect, panCrop, zoomCrop, type Crop } from '../lib/crop'
+import { CENTERED, MAX_ZOOM, cropRect, panCrop, zoomCrop, type Crop, type Dimensions } from '../lib/crop'
 import { itemCrop, itemDimensions, type PrintItem } from '../state'
 import { ArrowIcon, ZoomInIcon, ZoomOutIcon } from './icons'
 import { NUDGE, ZOOM_STEP, screenToPhoto } from './placement'
 
 interface AdjustPadProps {
   item: PrintItem | null
+  paper: Dimensions
   /** Whether the photo is shown turned sideways on the page, so the arrows follow the screen. */
   rotated: boolean
   onCrop: (crop: Crop) => void
@@ -22,13 +23,13 @@ function sameCrop(a: Crop, b: Crop): boolean {
   return Math.abs(a.zoom - b.zoom) < 1e-9 && Math.abs(a.cx - b.cx) < 1e-9 && Math.abs(a.cy - b.cy) < 1e-9
 }
 
-export function AdjustPad({ item, rotated, onCrop }: AdjustPadProps) {
+export function AdjustPad({ item, paper, rotated, onCrop }: AdjustPadProps) {
   if (!item || item.shape === 'whole') {
     return <div className="adjust" aria-hidden="true" />
   }
 
   const { photo } = item
-  const print = itemDimensions(item)
+  const print = itemDimensions(item, paper)
   const aspect = print.width / print.height
   const crop = itemCrop(item)
   const rect = cropRect(photo, aspect, crop)

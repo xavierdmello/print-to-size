@@ -14,6 +14,7 @@ import { useElementSize } from '../../components/useElementSize'
 
 interface CropEditorProps {
   item: PrintItem
+  paper: Dimensions
   onCrop: (crop: Crop) => void
   className?: string
   /** Space kept around the crop, as a fraction of the stage width. */
@@ -26,13 +27,13 @@ function fitWindow(stage: Dimensions, aspect: number, room: number): Dimensions 
   return { width: Math.max(0, width), height: Math.max(0, width / aspect) }
 }
 
-export function CropEditor({ item, onCrop, className, room = 0.07 }: CropEditorProps) {
+export function CropEditor({ item, paper, onCrop, className, room = 0.07 }: CropEditorProps) {
   const stageRef = useRef<HTMLDivElement>(null)
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const [dragging, setDragging] = useState(false)
   const stage = useElementSize(stageRef)
   const { photo } = item
-  const print = itemDimensions(item)
+  const print = itemDimensions(item, paper)
   const aspect = print.width / print.height
   const crop = itemCrop(item)
   const rect = cropRect(photo, aspect, crop)

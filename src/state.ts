@@ -1,4 +1,4 @@
-import { CENTERED, naturalShape, printDimensions, type Crop, type CropShape, type Shape } from './lib/crop'
+import { CENTERED, naturalShape, printDimensions, type Crop, type CropShape, type Dimensions, type Shape } from './lib/crop'
 import type { Piece } from './lib/layout'
 import type { PaperId } from './lib/paper'
 import type { Photo } from './lib/photo'
@@ -83,14 +83,14 @@ export function itemCrop(item: PrintItem): Crop {
   return item.shape === 'whole' ? CENTERED : item.crops[item.shape]
 }
 
-export function itemDimensions(item: PrintItem) {
-  return printDimensions(getSize(item.sizeId), item.shape, item.photo)
+export function itemDimensions(item: PrintItem, paper: Dimensions) {
+  return printDimensions(getSize(item.sizeId, paper), item.shape, item.photo)
 }
 
 /** Every copy of every photo, in order, keyed by its item so copies share one image. */
-export function sheetPieces(items: readonly PrintItem[]): Piece[] {
+export function sheetPieces(items: readonly PrintItem[], paper: Dimensions): Piece[] {
   return items.flatMap((item) => {
-    const { width, height } = itemDimensions(item)
+    const { width, height } = itemDimensions(item, paper)
     return Array.from({ length: item.copies }, () => ({ key: item.id, width, height }))
   })
 }

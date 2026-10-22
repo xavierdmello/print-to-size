@@ -19,3 +19,20 @@ The toolbar has an **Add photos…** button at the right, even before any photo 
 - **Two ways in is fine.** With no photo yet, the large Choose photos… on the page is the obvious first step, and the toolbar button is where adding photos always lives. A duplicate does no harm when one of the two never moves.
 
 **If adding more photos still feels hidden**, add something to the page, such as an empty slot showing where the next photo would go, without moving or renaming this button.
+
+## The size list shows a sample photo, not the viewer's photo
+
+Each size in the list is a little sheet of paper laid out the way that size prints, filled with the same sample landscape, as in the Windows 7 Print Pictures dialog. The number in brackets is how many of that size fit on one sheet.
+
+**Alternative considered**
+
+- Fill the little sheets with the viewer's own photo.
+
+**Why the sample photo**
+
+- **The list's job is to show layout:** how big each size is and how many fit on a page. A familiar, neutral picture makes that easy to compare at a glance.
+- **The viewer's photo is already shown large** on the page preview, cropped exactly as it will print. Repeating it six times at thumbnail size adds nothing and makes the list busy.
+- **It stays calm and consistent.** The list looks the same whatever the photo, the way the Windows 7 dialog did.
+
+The sample is our own drawing (`src/components/sample-photo.svg`), not Microsoft's image.
+
