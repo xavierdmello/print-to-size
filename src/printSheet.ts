@@ -15,7 +15,9 @@ export async function makeSheetPdf(items: readonly PrintItem[], paperId: PaperId
       await renderPrint(item.photo.bitmap, item.photo, getSize(item.sizeId, paper, item.custom), item.shape, itemCrop(item), item.fit),
     )
   }
-  return buildPdf(pages, images)
+  // Without Fit picture to frame the whole photo sits on white inside its frame, so only a line shows where the frame ends.
+  const outlined = new Set(items.filter((item) => !item.fit).map((item) => item.id))
+  return buildPdf(pages, images, outlined)
 }
 
 export function pdfFilename(items: readonly PrintItem[]): string {
