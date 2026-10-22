@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react'
+import { useMemo } from 'react'
 import type { Shape } from '../lib/crop'
 import { layoutSheets } from '../lib/layout'
 import type { Paper } from '../lib/paper'
@@ -18,12 +18,10 @@ interface SizeListProps {
   /** The selected photo's custom size, for the Custom entry. */
   custom?: CustomSize
   describe?: (size: PrintSize) => string
-  /** Shown under a size's entry. */
-  renderBelow?: (sizeId: SizeId) => ReactNode
 }
 
 /** Each size as a little sheet of paper filled with a sample photo, like the Windows 7 layouts. */
-export function SizeList({ shape, paper, sizeId, onChange, sizeIds, custom, describe, renderBelow }: SizeListProps) {
+export function SizeList({ shape, paper, sizeId, onChange, sizeIds, custom, describe }: SizeListProps) {
   const ids = sizeIds ?? sizesFor(paper.id)
   const sheets = useMemo(
     () =>
@@ -40,42 +38,40 @@ export function SizeList({ shape, paper, sizeId, onChange, sizeIds, custom, desc
   return (
     <div className="size-list" role="radiogroup" aria-label="Size">
       {sheets.map(({ size, page }) => (
-        <div key={size.id} className="size-entry">
-          <button
-            type="button"
-            role="radio"
-            aria-checked={sizeId === size.id}
-            className="size-option"
-            onClick={() => onChange(size.id)}
-          >
-            <span className="size-sheet-area" aria-hidden="true">
-              <span
-                className={`size-sheet${page.landscape ? ' is-landscape' : ''}`}
-                style={{ aspectRatio: `${page.width} / ${page.height}` }}
-              >
-                {page.placements.map((p, index) => (
-                  <img
-                    key={index}
-                    src={samplePhoto}
-                    alt=""
-                    draggable={false}
-                    style={{
-                      left: `${(p.x / page.width) * 100}%`,
-                      top: `${(p.y / page.height) * 100}%`,
-                      width: `${(p.width / page.width) * 100}%`,
-                      height: `${(p.height / page.height) * 100}%`,
-                    }}
-                  />
-                ))}
-              </span>
+        <button
+          key={size.id}
+          type="button"
+          role="radio"
+          aria-checked={sizeId === size.id}
+          className="size-option"
+          onClick={() => onChange(size.id)}
+        >
+          <span className="size-sheet-area" aria-hidden="true">
+            <span
+              className={`size-sheet${page.landscape ? ' is-landscape' : ''}`}
+              style={{ aspectRatio: `${page.width} / ${page.height}` }}
+            >
+              {page.placements.map((p, index) => (
+                <img
+                  key={index}
+                  src={samplePhoto}
+                  alt=""
+                  draggable={false}
+                  style={{
+                    left: `${(p.x / page.width) * 100}%`,
+                    top: `${(p.y / page.height) * 100}%`,
+                    width: `${(p.width / page.width) * 100}%`,
+                    height: `${(p.height / page.height) * 100}%`,
+                  }}
+                />
+              ))}
             </span>
-            <span className="size-label">
-              {describe ? describe(size) : size.label}
-              {size.id !== 'full' && ` (${page.placements.length})`}
-            </span>
-          </button>
-          {renderBelow?.(size.id)}
-        </div>
+          </span>
+          <span className="size-label">
+            {describe ? describe(size) : size.label}
+            {size.id !== 'full' && ` (${page.placements.length})`}
+          </span>
+        </button>
       ))}
     </div>
   )

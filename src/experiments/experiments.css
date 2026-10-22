@@ -404,26 +404,3 @@
   font-size: 12px;
   white-space: nowrap;
 }
-
-/* Width and height boxes under the Custom size. */
-
-.custom-size {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 4px 0 8px;
-  font-size: 0.9rem;
-}
-
-.custom-size input {
-  width: 52px;
-  min-height: 30px;
-  padding: 0 4px;
-  border: 1px solid var(--control-line, #acacac);
-  border-radius: 3px;
-  background: var(--content, #fff);
-  color: inherit;
-  font: inherit;
-}
-

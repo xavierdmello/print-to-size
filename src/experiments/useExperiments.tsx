@@ -2,8 +2,8 @@
  * EXPERIMENT: throwaway UI test behind a dev-only switch (see README, "Experiments").
  * Not a pattern to build on. Delete it, or rebuild the winning idea properly in the core app.
  *
- * Turns the dev switches into props for the editors and the size list, so the app only
- * spreads them in. With every switch off, everything here gives the editors nothing extra.
+ * Turns the dev switches into props for the editors, the size list and the bottom bar, so the
+ * app only spreads them in. With every switch off, everything here gives the editors nothing extra.
  */
 import type { Dispatch } from 'react'
 import type { Selection } from '../components/selection'
@@ -11,11 +11,10 @@ import type { Paper } from '../lib/paper'
 import { getSize, largestSize, MIN_CUSTOM, type SizeId } from '../lib/sizes'
 import type { Action, PrintItem } from '../state'
 import type { DevFlags } from './flags'
-import { snapFrame } from './onPhoto/measure'
-import { unitFor } from './onPhoto/measure'
+import { snapFrame, unitFor, type SnappedFrame } from './onPhoto/measure'
 import { PhotoOverlay } from './onPhoto/PhotoOverlay'
 import { useCropIntro } from './onPhoto/useCropIntro'
-import { CustomSizeFields } from './sizes/CustomSizeFields'
+import { SizeFields } from './sizes/SizeFields'
 import { describeSize, snapTargets, visibleSizes } from './sizes/sizeOptions'
 
 export function useExperiments(
@@ -39,6 +38,10 @@ export function useExperiments(
     return snapFrame(w, h, snapTargets(flags, paper, item), unit)
   }
 
+  function setFrame(target: PrintItem, frame: SnappedFrame) {
+    dispatch({ type: 'setFrame', id: target.id, sizeId: frame.sizeId, shape: frame.shape, custom: frame.custom })
+  }
+
   const renderSelected = drawsOnPhoto
     ? (selection: Selection) => (
         <PhotoOverlay
@@ -49,9 +52,7 @@ export function useExperiments(
             dispatch({ type: 'setShape', id: selection.item.id, shape: selection.item.shape === 'wide' ? 'tall' : 'wide' })
           }
           previewResize={previewResize}
-          commitResize={(frame) =>
-            dispatch({ type: 'setFrame', id: selection.item.id, sizeId: frame.sizeId, shape: frame.shape, custom: frame.custom })
-          }
+          commitResize={(frame) => setFrame(selection.item, frame)}
         />
       )
     : undefined
@@ -83,16 +84,16 @@ export function useExperiments(
       sizeIds: visibleSizes(flags, paper, item),
       custom: item?.custom,
       describe: (size: Parameters<typeof describeSize>[0]) => describeSize(size, paper, item),
-      renderBelow: (sizeId: SizeId) =>
-        sizeId === 'custom' && flags.customSize && item?.sizeId === 'custom' ? (
-          <CustomSizeFields
-            key={item.id}
-            item={item}
-            paper={paper}
-            onChange={(shape, custom) => dispatch({ type: 'setFrame', id: item.id, sizeId: 'custom', shape, custom })}
-          />
-        ) : null,
     },
+    sizeFields: flags.customSize ? (
+      <SizeFields
+        key={item?.id ?? 'none'}
+        item={item}
+        paper={paper}
+        resolve={previewResize}
+        onChange={(frame) => item && setFrame(item, frame)}
+      />
+    ) : null,
     chooseSize,
   }
 }
