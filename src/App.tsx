@@ -9,6 +9,7 @@ import { DevPanel } from './experiments/DevPanel'
 import { DEV_MODE, useDevFlags } from './experiments/flags'
 import { frameCropProps } from './experiments/frameCrop'
 import { RealSizeButton } from './experiments/RealSize'
+import { useSmartCrop } from './experiments/smartCrop/useSmartCrop'
 import { effectiveDpi } from './lib/crop'
 import { layoutSheets } from './lib/layout'
 import { PAPERS, defaultPaperFor, getPaper, isPaperId } from './lib/paper'
@@ -37,6 +38,7 @@ function initialState(): AppState {
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState)
   const [flags, setFlags] = useDevFlags()
+  const smartCropStatus = useSmartCrop(state.items, flags.smartCrop, dispatch)
   const [busy, setBusy] = useState<'print' | 'save' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -280,7 +282,7 @@ export default function App() {
         </main>
       )}
 
-      {DEV_MODE && <DevPanel flags={flags} onChange={setFlags} />}
+      {DEV_MODE && <DevPanel flags={flags} onChange={setFlags} smartCropStatus={smartCropStatus} />}
     </div>
   )
 }
