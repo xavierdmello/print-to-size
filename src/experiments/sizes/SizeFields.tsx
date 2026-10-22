@@ -1,5 +1,5 @@
 /**
- * EXPERIMENT: throwaway UI test behind a dev-only switch (see README, "Experiments").
+ * EXPERIMENT: throwaway UI test behind a dev-only switch (see docs/development.md, "Experiments").
  * Not a pattern to build on. Delete it, or rebuild the winning idea properly in the core app.
  *
  * Size boxes for the selected photo, pinned under the size list. Like the list's labels, they

@@ -1,5 +1,5 @@
 /**
- * EXPERIMENT: throwaway UI test behind a dev-only switch (see README, "Experiments").
+ * EXPERIMENT: throwaway UI test behind a dev-only switch (see docs/development.md, "Experiments").
  * Not a pattern to build on. Delete it, or rebuild the winning idea properly in the core app.
  *
  * Face detection runs on the device with MediaPipe. Only the model and its runtime are

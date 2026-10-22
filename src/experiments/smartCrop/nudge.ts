@@ -1,5 +1,5 @@
 /**
- * EXPERIMENT: throwaway UI test behind a dev-only switch (see README, "Experiments").
+ * EXPERIMENT: throwaway UI test behind a dev-only switch (see docs/development.md, "Experiments").
  * Not a pattern to build on. Delete it, or rebuild the winning idea properly in the core app.
  *
  * The rule: keep the largest centred crop, and move it (never zoom) only as far as needed to
