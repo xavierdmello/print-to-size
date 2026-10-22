@@ -124,12 +124,21 @@ export function PhotoOverlay({ selection, flags, unit, onToggleShape, previewRes
   )
 }
 
-/** A tall and a wide rectangle: switches the frame, not the picture. */
+/** A clockwise rotate arrow. */
 function ShapeSwitchIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-      <rect x="3" y="4" width="8" height="13" rx="1" />
-      <rect x="9" y="12" width="12" height="8" rx="1" />
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
     </svg>
   )
 }
