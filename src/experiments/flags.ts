@@ -14,8 +14,7 @@ export interface DevFlags {
   smartCrop: boolean
   showCutOff: boolean
   cropIntro: boolean
-  moveHint: boolean
-  dragCaption: boolean
+  moveCursor: boolean
   sizeMarks: boolean
   shapeSwitch: boolean
   moreSizes: boolean
@@ -25,38 +24,44 @@ export interface DevFlags {
 
 export type Switch = Exclude<keyof DevFlags, 'frameStyle'>
 
-const OFF: DevFlags = {
+/**
+ * Where every switch starts, here and in the live app. The ones approved after testing are on;
+ * the rest are still being tried out and stay off unless switched on in the dev panel.
+ */
+const DEFAULTS: DevFlags = {
   frameCrop: false,
   frameStyle: 'black',
   realSize: false,
   smartCrop: false,
-  showCutOff: false,
+  showCutOff: true,
   cropIntro: false,
-  moveHint: false,
-  dragCaption: false,
-  sizeMarks: false,
-  shapeSwitch: false,
+  moveCursor: true,
+  sizeMarks: true,
+  shapeSwitch: true,
   moreSizes: false,
   customSize: false,
   dragResize: false,
 }
 
+// A new name, so switches saved before the approved ones defaulted on don't override that.
+const STORAGE_KEY = 'dev-flags-v2'
+
 /** The switch panel only exists when the page is opened with `?dev`. */
 export const DEV_MODE = new URLSearchParams(location.search).has('dev')
 
 function load(): DevFlags {
-  if (!DEV_MODE) return OFF
+  if (!DEV_MODE) return DEFAULTS
   try {
-    return { ...OFF, ...JSON.parse(readSetting('dev-flags') ?? '{}') }
+    return { ...DEFAULTS, ...JSON.parse(readSetting(STORAGE_KEY) ?? '{}') }
   } catch {
-    return OFF
+    return DEFAULTS
   }
 }
 
 export function useDevFlags() {
   const [flags, setFlags] = useState<DevFlags>(load)
   useEffect(() => {
-    if (DEV_MODE) writeSetting('dev-flags', JSON.stringify(flags))
+    if (DEV_MODE) writeSetting(STORAGE_KEY, JSON.stringify(flags))
   }, [flags])
   return [flags, setFlags] as const
 }

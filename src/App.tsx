@@ -198,7 +198,7 @@ export default function App() {
               paper={paper}
               onCrop={(crop) => setCrop(item, crop)}
               room={frameCropProps(flags).room}
-              className={[frameCropProps(flags).className, experiments.frame.moveHintClass].filter(Boolean).join(' ')}
+              className={[frameCropProps(flags).className, experiments.frame.moveCursorClass].filter(Boolean).join(' ')}
               showCutOff={experiments.frame.showCutOff}
               intro={experiments.frame.intro}
               onIntroEnd={experiments.frame.onIntroEnd}

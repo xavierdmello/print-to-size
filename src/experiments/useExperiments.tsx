@@ -27,7 +27,7 @@ export function useExperiments(
 ) {
   const { introId, endIntro } = useCropIntro(items, flags.cropIntro)
   const unit = unitFor(paper.id)
-  const drawsOnPhoto = flags.sizeMarks || flags.shapeSwitch || flags.moveHint || flags.dragCaption || flags.dragResize
+  const drawsOnPhoto = flags.sizeMarks || flags.shapeSwitch || flags.dragResize
 
   function previewResize(width: number, height: number) {
     const largest = largestSize(paper)
@@ -69,14 +69,14 @@ export function useExperiments(
       showCutOff: flags.showCutOff,
       introId,
       onIntroEnd: endIntro,
-      selectedClassName: flags.moveHint ? 'has-move-hint' : undefined,
+      selectedClassName: flags.moveCursor ? 'has-move-cursor' : undefined,
       renderSelected,
     },
     frame: {
       showCutOff: flags.showCutOff,
       intro: item !== null && introId === item.id,
       onIntroEnd: endIntro,
-      moveHintClass: flags.moveHint ? 'has-move-hint' : '',
+      moveCursorClass: flags.moveCursor ? 'has-move-cursor' : '',
       renderSelected,
     },
     sizeList: {

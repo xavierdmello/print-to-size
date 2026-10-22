@@ -2,11 +2,10 @@
  * EXPERIMENT: throwaway UI test behind a dev-only switch (see README, "Experiments").
  * Not a pattern to build on. Delete it, or rebuild the winning idea properly in the core app.
  *
- * Everything the "On the photo" and "Showing the crop" switches draw over the selected
- * photo. Each piece shows only when its own switch is on, and they're laid out so any
- * combination fits together: size marks outside the top and left edges, the wide/tall switch
- * outside the top-right corner, resize handles on the edges, the move icon in the middle and
- * the caption along the bottom.
+ * Everything the "On the photo" switches draw over the selected photo. Each piece shows only
+ * when its own switch is on, and they're laid out so any combination fits together: size marks
+ * outside the top and left edges, the wide/tall switch outside the top-right corner, and resize
+ * handles on the edges.
  */
 import { useRef, useState, type PointerEvent } from 'react'
 import type { Selection } from '../../components/selection'
@@ -45,7 +44,7 @@ export function PhotoOverlay({ selection, flags, unit, onToggleShape, previewRes
   const overlay = useRef<HTMLDivElement>(null)
   const drag = useRef<Drag | null>(null)
   const [preview, setPreview] = useState<SnappedFrame | null>(null)
-  const { print, pxPerInch, item, editable } = selection
+  const { print, pxPerInch, item } = selection
   const shown = preview ?? print
 
   function startResize(event: PointerEvent<HTMLSpanElement>, x: number, y: number) {
@@ -101,14 +100,6 @@ export function PhotoOverlay({ selection, flags, unit, onToggleShape, previewRes
         </button>
       )}
 
-      {flags.moveHint && editable && !preview && (
-        <span className="move-hint" aria-hidden="true">
-          <MoveIcon />
-        </span>
-      )}
-
-      {flags.dragCaption && editable && !preview && <span className="drag-caption">Drag to move</span>}
-
       {flags.dragResize && selection.resizable && (
         <>
           {HANDLES.map((handle) => (
@@ -130,14 +121,6 @@ export function PhotoOverlay({ selection, flags, unit, onToggleShape, previewRes
         </>
       )}
     </div>
-  )
-}
-
-function MoveIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3" />
-    </svg>
   )
 }
 

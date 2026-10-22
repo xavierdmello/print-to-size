@@ -11,8 +11,7 @@ const GROUPS: { title: string; switches: { key: Switch; label: string }[] }[] = 
     switches: [
       { key: 'showCutOff', label: 'Cut-off parts always visible' },
       { key: 'cropIntro', label: 'Crop-in animation' },
-      { key: 'moveHint', label: 'Move cursor and icon' },
-      { key: 'dragCaption', label: '"Drag to move" caption' },
+      { key: 'moveCursor', label: 'Move cursor' },
     ],
   },
   {

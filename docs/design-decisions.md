@@ -60,3 +60,15 @@ With Letter paper the sizes are in inches; with A4 they are the metric frame siz
 
 **Why:** the inch sizes printed exactly on A4, but they don't match metric frames: a 4 × 6 in. print is about 2 mm too big for a 10 × 15 cm frame, and a 5 × 7 in. print about 3 mm too small for a 13 × 18 cm one. Windows 7 switches to centimetre sizes on A4 for the same reason.
 
+## No "Drag to move" caption
+
+We tried a small "Drag to move" caption on the selected photo, behind a dev switch, and removed it.
+
+**Why:** it isn't needed. The approved, on-by-default switches already make both points it was meant to make, without words on the photo:
+
+- **Cut-off parts always visible** shows that the photo is being cropped and that there's more of it to slide into view.
+- **The move cursor** shows the photo can be dragged as soon as the pointer is over it.
+- **Size marks** and **the wide/tall switch** sit around the photo and make it read as something you can adjust.
+
+The four-arrow move icon from the same experiment went too, for the same reason; the cursor alone was enough.
+
