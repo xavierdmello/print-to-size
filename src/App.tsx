@@ -8,6 +8,7 @@ import { SizeChoices } from './components/SizeChoices'
 import { DevPanel } from './experiments/DevPanel'
 import { DEV_MODE, useDevFlags } from './experiments/flags'
 import { frameCropProps } from './experiments/frameCrop'
+import { RealSizeButton } from './experiments/RealSize'
 import { effectiveDpi } from './lib/crop'
 import { layoutSheets } from './lib/layout'
 import { PAPERS, defaultPaperFor, getPaper, isPaperId } from './lib/paper'
@@ -186,6 +187,7 @@ export default function App() {
                   onCrop={(crop) => item.shape !== 'whole' && dispatch({ type: 'setCrop', id: item.id, shape: item.shape, crop })}
                 />
               )}
+              {flags.realSize && <RealSizeButton item={item} framed={frameCropProps(flags).className} />}
               {quality && (
                 <p className="notice">
                   <AlertIcon />

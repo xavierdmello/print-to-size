@@ -46,8 +46,9 @@
   --wall: #e7e4df;
 }
 
-/* Sizes in inches only resolve where the crop window sets --ppi. */
-.experiment-frame-crop .crop-window {
+/* Sizes in inches only resolve where --ppi is set. */
+.experiment-frame-crop .crop-window,
+.experiment-frame-crop.real-size-print {
   --moulding: calc(var(--ppi) * 0.7);
   /* The part of the print a real frame's lip covers on each edge. */
   --lip: calc(var(--ppi) * 0.15);
@@ -97,4 +98,75 @@
 
 .experiment-frame-crop.frame-wood .crop-shade::before {
   border-image: linear-gradient(135deg, #7b4b28, #b27d4d 35%, #8d5a33 60%, #6d4021) 1;
+}
+
+/* Real size: the print at its physical size, after a one-time bank-card calibration. */
+
+.real-size {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  background: var(--bg);
+}
+
+.real-size-bar {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  padding-block: 12px;
+  padding-left: var(--gutter-left);
+  padding-right: var(--gutter-right);
+}
+
+.real-size-calibrate {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding-block: 24px;
+  padding-left: var(--gutter-left);
+  padding-right: var(--gutter-right);
+  text-align: center;
+}
+
+.real-size-calibrate p {
+  max-width: 34ch;
+  margin: 0;
+}
+
+.real-size-calibrate input {
+  width: min(420px, 100%);
+}
+
+.real-size-card {
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent-soft);
+}
+
+.real-size-stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-width: max-content;
+  padding: 64px;
+}
+
+.real-size-print {
+  position: relative;
+  box-shadow: 0 0 0 1px var(--cut), 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.real-size-print.experiment-frame-crop .crop-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
